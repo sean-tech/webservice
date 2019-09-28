@@ -6,7 +6,7 @@ import (
 	"log"
 	"path/filepath"
 	"runtime"
-	"sean.env/config"
+	"github.com/sean-tech/webservice/config"
 	"sync"
 )
 
@@ -88,9 +88,9 @@ func getPrefix(level Level) string {
 }
 
 func logFileSliceTiming()  {
-	c := cron.New(cron.WithSeconds())
+	c := cron.New()
 	spec := "0 0 0 * * *"
-	_, err := c.AddFunc(spec, func() {
+	err := c.AddFunc(spec, func() {
 		if fileTimePassDaySlice(levelFlags[DEBUG]) {
 			debugLogger = initLogger(DEBUG)
 		}

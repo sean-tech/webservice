@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sean.env/config"
-	"sean.env/fileutils"
-	"sean.env/logging"
-	"sean.env/services/validation"
+	"github.com/sean-tech/webservice/config"
+	"github.com/sean-tech/webservice/fileutils"
+	"github.com/sean-tech/webservice/logging"
+	"github.com/sean-tech/webservice/services/validation"
 	"time"
 )
 

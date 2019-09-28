@@ -3,8 +3,8 @@ package logging
 import (
 	"fmt"
 	"os"
-	"sean.env/config"
-	"sean.env/fileutils"
+	"github.com/sean-tech/webservice/config"
+	"github.com/sean-tech/webservice/fileutils"
 	"strings"
 	"time"
 )

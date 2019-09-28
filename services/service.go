@@ -7,8 +7,8 @@ import (
 	"github.com/smallnest/rpcx/server"
 	"github.com/smallnest/rpcx/serverplugin"
 	"log"
-	"sean.env/config"
-	"sean.env/services/validation"
+	"github.com/sean-tech/webservice/config"
+	"github.com/sean-tech/webservice/services/validation"
 	"time"
 )
 

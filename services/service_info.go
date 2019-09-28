@@ -2,7 +2,7 @@ package services
 
 import (
 	"context"
-	"sean.env/config"
+	"github.com/sean-tech/webservice/config"
 )
 
 const KEY_SERVICE_INFO = "KEY_SERVICE_INFO"

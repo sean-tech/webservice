@@ -6,8 +6,8 @@ import (
 	"mime/multipart"
 	"os"
 	"path"
-	"sean.env/config"
-	"sean.env/cryptutils"
+	"github.com/sean-tech/webservice/config"
+	"github.com/sean-tech/webservice/cryptutils"
 	"strings"
 )
 

@@ -3,8 +3,8 @@ package middle
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"sean.env/config"
-	"sean.env/services"
+	"github.com/sean-tech/webservice/config"
+	"github.com/sean-tech/webservice/services"
 	"time"
 )
 

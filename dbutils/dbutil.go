@@ -4,7 +4,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"sean.env/config"
+	"github.com/sean-tech/webservice/config"
 )
 
 /** 数据中心id 关联 db Map **/

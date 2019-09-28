@@ -8,11 +8,6 @@ import (
 	"time"
 )
 
-const (
-	KEY_CTX_USERID 		= "KEY_CTX_USERID"
-	KEY_CTX_USERNAME 	= "KEY_CTX_USERNAME"
-	KEY_CTX_PASSWORD 	= "KEY_CTX_PASSWORD"
-)
 
 var jwtSecret = []byte(config.AppSetting.JwtSecret)
 
@@ -69,9 +64,9 @@ func Jwt() gin.HandlerFunc {
 		} else if time.Now().Unix() > claims.ExpiresAt {
 			statusCode = services.STATUS_CODE_AUTH_CHECK_TOKEN_TIMEOUT
 		} else {
-			ctx.Set(KEY_CTX_USERID, claims.UserId)
-			ctx.Set(KEY_CTX_USERNAME, claims.UserName)
-			ctx.Set(KEY_CTX_PASSWORD, claims.Password)
+			ctx.Set(services.KEY_CTX_USERID, claims.UserId)
+			ctx.Set(services.KEY_CTX_USERNAME, claims.UserName)
+			ctx.Set(services.KEY_CTX_PASSWORD, claims.Password)
 		}
 		if statusCode != services.STATUS_CODE_SUCCESS {
 			g.ResponseCode(statusCode, nil)

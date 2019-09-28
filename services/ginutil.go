@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/sean-tech/webservice/services/middle"
 	"log"
 	"net/http"
 	"os"
@@ -115,19 +114,25 @@ func (g *Gin) ResponseMsg(statusCode StatusCode, msg string, data interface{})  
 	return
 }
 
+
+const (
+	KEY_CTX_USERID 		= "KEY_CTX_USERID"
+	KEY_CTX_USERNAME 	= "KEY_CTX_USERNAME"
+	KEY_CTX_PASSWORD 	= "KEY_CTX_PASSWORD"
+)
 /**
  * 对ServiceInfo赋值
  */
 func (g *Gin) BindServiceInfo(info *ServiceInfo)  {
-	userId, exist := g.Ctx.Get(middle.KEY_CTX_USERID)
+	userId, exist := g.Ctx.Get(KEY_CTX_USERID)
 	if exist {
 		info.UserId = userId.(uint64)
 	}
-	userName, exist := g.Ctx.Get(middle.KEY_CTX_USERNAME)
+	userName, exist := g.Ctx.Get(KEY_CTX_USERNAME)
 	if exist {
 		info.UserName = userName.(string)
 	}
-	password, exist := g.Ctx.Get(middle.KEY_CTX_PASSWORD)
+	password, exist := g.Ctx.Get(KEY_CTX_PASSWORD)
 	if exist {
 		info.Password = password.(string)
 	}

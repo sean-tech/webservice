@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"github.com/rcrowley/go-metrics"
 	"github.com/sean-tech/webservice/logging"
@@ -81,8 +82,9 @@ func ValidParameter(parameter interface{}) error {
 	}
 	if !check {
 		for _, err := range valid.Errors {
-			logging.Info(err.Key, err.Message)
-			return err
+			errorStr := "参数:" + err.Key + " 校验失败:" + err.Message
+			logging.Info(errorStr)
+			return errors.New(errorStr)
 		}
 	}
 	return nil

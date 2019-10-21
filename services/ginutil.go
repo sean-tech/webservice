@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/astaxie/beego/validation"
 	"github.com/gin-gonic/gin"
@@ -77,9 +78,10 @@ func (g *Gin) BindAndValid(parameter interface{}) error {
 	}
 	if !check {
 		for _, err := range valid.Errors {
-			logging.Info(err.Key, err.Message)
+			errorStr := "参数:" + err.Key + " 校验失败:" + err.Message
+			logging.Info(errorStr)
+			return errors.New(errorStr)
 		}
-		return err
 	}
 	return nil
 }

@@ -3,12 +3,13 @@ package services
 import (
 	"fmt"
 	"github.com/rcrowley/go-metrics"
+	"github.com/sean-tech/webservice/logging"
 	"github.com/smallnest/rpcx/client"
 	"github.com/smallnest/rpcx/server"
 	"github.com/smallnest/rpcx/serverplugin"
 	"log"
 	"github.com/sean-tech/webservice/config"
-	"github.com/sean-tech/webservice/services/validation"
+	"github.com/astaxie/beego/validation"
 	"time"
 )
 
@@ -79,7 +80,9 @@ func ValidParameter(parameter interface{}) error {
 		return err
 	}
 	if !check {
-		validation.MarkErrors(valid.Errors)
+		for _, err := range valid.Errors {
+			logging.Info(err.Key, err.Message)
+		}
 		return err
 	}
 	return nil

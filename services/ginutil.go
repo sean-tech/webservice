@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"github.com/astaxie/beego/validation"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -11,7 +12,6 @@ import (
 	"github.com/sean-tech/webservice/config"
 	"github.com/sean-tech/webservice/fileutils"
 	"github.com/sean-tech/webservice/logging"
-	"github.com/sean-tech/webservice/services/validation"
 	"time"
 )
 
@@ -76,7 +76,9 @@ func (g *Gin) BindAndValid(parameter interface{}) error {
 		return err
 	}
 	if !check {
-		validation.MarkErrors(valid.Errors)
+		for _, err := range valid.Errors {
+			logging.Info(err.Key, err.Message)
+		}
 		return err
 	}
 	return nil

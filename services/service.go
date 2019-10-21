@@ -82,8 +82,8 @@ func ValidParameter(parameter interface{}) error {
 	if !check {
 		for _, err := range valid.Errors {
 			logging.Info(err.Key, err.Message)
+			return err
 		}
-		return err
 	}
 	return nil
 }

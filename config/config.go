@@ -12,8 +12,9 @@ type appSetting struct {
 	RunMode string
 	Module string
 	WorkerId int64
-	JwtSecret string
 	RuntimeRootPath string
+	JwtSecret string
+	JwtIssuer string
 }
 var AppSetting = &appSetting{}
 

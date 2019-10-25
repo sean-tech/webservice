@@ -120,25 +120,31 @@ func (g *Gin) ResponseMsg(statusCode StatusCode, msg string, data interface{})  
 
 
 const (
-	KEY_CTX_USERID 		= "KEY_CTX_USERID"
-	KEY_CTX_USERNAME 	= "KEY_CTX_USERNAME"
-	KEY_CTX_PASSWORD 	= "KEY_CTX_PASSWORD"
+	KEY_CTX_USERID 				= "KEY_CTX_USERID"
+	KEY_CTX_USERNAME 			= "KEY_CTX_USERNAME"
+	KEY_CTX_PASSWORD 			= "KEY_CTX_PASSWORD"
+	KEY_CTX_IS_ADMINISTROTOR 	= "KEY_CTX_IS_ADMINISTROTOR"
 )
 /**
  * 对ServiceInfo赋值
  */
-func (g *Gin) BindServiceInfo(info *ServiceInfo)  {
+func (g *Gin) BindServiceInfo(serviceCtx context.Context)  {
+	serviceInfo := GetServiceInfo(serviceCtx)
 	userId, exist := g.Ctx.Get(KEY_CTX_USERID)
 	if exist {
-		info.UserId = userId.(uint64)
+		serviceInfo.UserId = userId.(uint64)
 	}
 	userName, exist := g.Ctx.Get(KEY_CTX_USERNAME)
 	if exist {
-		info.UserName = userName.(string)
+		serviceInfo.UserName = userName.(string)
 	}
 	password, exist := g.Ctx.Get(KEY_CTX_PASSWORD)
 	if exist {
-		info.Password = password.(string)
+		serviceInfo.Password = password.(string)
+	}
+	isAdministrotor, exist := g.Ctx.Get(KEY_CTX_IS_ADMINISTROTOR)
+	if exist {
+		serviceInfo.IsAdministrotor = isAdministrotor.(bool)
 	}
 }
 

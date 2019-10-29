@@ -47,3 +47,10 @@ func DbByUserName(userName string) (db *sqlx.DB, err error) {
 	return dbMap[dataCenterId], nil
 }
 
+func GetAllDbs() (dbs []*sqlx.DB) {
+	for _, v := range dbMap {
+		dbs = append(dbs, v)
+	}
+	return dbs
+}
+

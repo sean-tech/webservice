@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-const dnaBits int = 3
+const dnaMaxBits int = 11
 
 func Dna(userName string) (int, error) {
 	if len(userName) <= 0 {
@@ -28,14 +28,15 @@ func Dna(userName string) (int, error) {
 }
 
 func dnaFromNumber(userName int) (int, error) {
+
 	// 长度判断
 	dnsStr := strconv.Itoa(userName)
 	dnaLen := len(dnsStr)
-	if dnaLen <= dnaBits {
+	if dnaLen <= dnaMaxBits {
 		return userName, nil
 	}
 	// 长度超过指定最大长度，裁剪
-	clipStr := dnsStr[dnaLen-3 : dnaLen]
+	clipStr := dnsStr[dnaLen-dnaMaxBits : dnaLen]
 	dna, err := strconv.Atoi(clipStr)
 	if err != nil {
 		return -1, err

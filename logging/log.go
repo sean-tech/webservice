@@ -3,10 +3,11 @@ package logging
 import (
 	"fmt"
 	"github.com/robfig/cron"
+	"github.com/sean-tech/webservice/config"
+	"io"
 	"log"
 	"path/filepath"
 	"runtime"
-	"github.com/sean-tech/webservice/config"
 	"sync"
 )
 
@@ -17,6 +18,7 @@ const (
 	INFO
 	WARNING
 	ERROR
+	GIN
 )
 
 var (
@@ -24,7 +26,7 @@ var (
 	DefaultPrefix = ""
 	DefaultCallerDepth = 2
 
-	levelFlags = []string{"DEBUG", "INFO", "WARN", "ERROR"}
+	levelFlags = []string{"DEBUG", "INFO", "WARN", "ERROR", "GIN"}
 	lock sync.Mutex
 	debugLogger *log.Logger
 	infoLogger 	*log.Logger
@@ -34,7 +36,9 @@ var (
 
 func Setup() {
 
-	debugLogger = initLogger(DEBUG)
+	if config.AppSetting.RunMode == "debug" {
+		debugLogger = initLogger(DEBUG)
+	}
 	infoLogger = initLogger(INFO)
 	warnLogger = initLogger(WARNING)
 	errorLogger = initLogger(ERROR)
@@ -91,7 +95,7 @@ func logFileSliceTiming()  {
 	c := cron.New()
 	spec := "0 0 0 * * *"
 	err := c.AddFunc(spec, func() {
-		if fileTimePassDaySlice(levelFlags[DEBUG]) {
+		if config.AppSetting.RunMode == "debug" && fileTimePassDaySlice(levelFlags[DEBUG]) {
 			debugLogger = initLogger(DEBUG)
 		}
 		if fileTimePassDaySlice(levelFlags[INFO]) {
@@ -103,9 +107,33 @@ func logFileSliceTiming()  {
 		if fileTimePassDaySlice(levelFlags[ERROR]) {
 			errorLogger = initLogger(ERROR)
 		}
+		if ginWriterCallback != nil && fileTimePassDaySlice(levelFlags[GIN]) {
+			GinWriterGet(ginWriterCallback)
+		}
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 	c.Start()
+}
+
+
+type GinWriterCallback func(writer io.Writer)
+var ginWriterCallback GinWriterCallback = nil
+/**
+ * 提供gin日志文件writer回调
+ */
+func GinWriterGet(callback GinWriterCallback)  {
+	if callback == nil {
+		return
+	}
+	if &ginWriterCallback != &callback {
+		ginWriterCallback = callback
+	}
+
+	file, err := openLogFile(getLogFileName(levelFlags[GIN]), getLogFilePath())
+	if err != nil {
+		log.Fatalln(err)
+	}
+	ginWriterCallback(file)
 }

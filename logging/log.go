@@ -32,6 +32,7 @@ var (
 	infoLogger 	*log.Logger
 	warnLogger 	*log.Logger
 	errorLogger *log.Logger
+	ginWriter io.Writer
 )
 
 func Setup() {
@@ -131,9 +132,10 @@ func GinWriterGet(callback GinWriterCallback)  {
 		ginWriterCallback = callback
 	}
 
-	file, err := openLogFile(getLogFileName(levelFlags[GIN]), getLogFilePath())
+	var err error
+	ginWriter, err = openLogFile(getLogFileName(levelFlags[GIN]), getLogFilePath())
 	if err != nil {
 		log.Fatalln(err)
 	}
-	ginWriterCallback(file)
+	ginWriterCallback(ginWriter)
 }

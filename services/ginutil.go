@@ -2,17 +2,15 @@ package services
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"github.com/astaxie/beego/validation"
 	"github.com/gin-gonic/gin"
+	"github.com/sean-tech/webservice/config"
+	"github.com/sean-tech/webservice/fileutils"
+	"github.com/sean-tech/webservice/logging"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"github.com/sean-tech/webservice/config"
-	"github.com/sean-tech/webservice/fileutils"
-	"github.com/sean-tech/webservice/logging"
 	"time"
 )
 
@@ -31,7 +29,7 @@ func ServerServe(handler http.Handler) {
 	}
 	go func() {
 		if err := s.ListenAndServe(); err != nil {
-			log.Fatal("Listen: %s\n", err)
+			log.Fatal(fmt.Sprintf("Listen: %v\n", err))
 		}
 	}()
 	// signal
@@ -50,52 +48,6 @@ func ServerServe(handler http.Handler) {
 
 type Gin struct {
 	Ctx *gin.Context
-}
-
-/**
- * 参数绑定
- */
-func (g *Gin) Bind(parameter interface{}) error {
-	err := g.Ctx.Bind(parameter)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/**
- * 参数绑定验证
- */
-func (g *Gin) BindAndValid(parameter interface{}) error {
-	err := g.Ctx.Bind(parameter)
-	if err != nil {
-		return err
-	}
-	valid := validation.Validation{}
-	check, err := valid.Valid(parameter)
-	if err != nil {
-		return err
-	}
-	if !check {
-		for _, err := range valid.Errors {
-			errorStr := "参数:" + err.Key + " 校验失败:" + err.Message
-			logging.Info(errorStr)
-			return errors.New(errorStr)
-		}
-	}
-	return nil
-}
-
-type ValidMidHandler func(parameter interface{})  error
-/**
- * 参数绑定验证，带中间处理调用
- */
-func (g *Gin) BindAndValidWithMidHandler(parameter interface{}, midhandler ValidMidHandler) error {
-	err := g.BindAndValid(parameter)
-	if err != nil {
-		return err
-	}
-	return midhandler(parameter)
 }
 
 /**
@@ -118,6 +70,16 @@ func (g *Gin) ResponseMsg(statusCode StatusCode, msg string, data interface{})  
 	return
 }
 
+/**
+ * 参数绑定
+ */
+func (g *Gin) BindParameter(parameter interface{}) error {
+	err := g.Ctx.Bind(parameter)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 const (
 	KEY_CTX_USERID 				= "KEY_CTX_USERID"
@@ -147,6 +109,8 @@ func (g *Gin) BindServiceInfo(serviceCtx context.Context)  {
 		serviceInfo.IsAdministrotor = isAdministrotor.(bool)
 	}
 }
+
+
 
 /**
  * 文件上传处理函数

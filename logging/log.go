@@ -14,11 +14,11 @@ import (
 type Level int
 
 const (
-	DEBUG Level = iota
-	INFO
-	WARNING
-	ERROR
-	GIN
+	level_debug Level = iota
+	level_info
+	level_warning
+	level_error
+	level_gin
 )
 
 var (
@@ -26,7 +26,7 @@ var (
 	DefaultPrefix = ""
 	DefaultCallerDepth = 2
 
-	levelFlags = []string{"DEBUG", "INFO", "WARN", "ERROR", "GIN"}
+	levelFlags = []string{"level_debug", "level_info", "WARN", "level_error", "level_gin"}
 	lock sync.Mutex
 	debugLogger *log.Logger
 	infoLogger 	*log.Logger
@@ -38,11 +38,11 @@ var (
 func Setup() {
 
 	if config.AppSetting.RunMode == "debug" {
-		debugLogger = initLogger(DEBUG)
+		debugLogger = initLogger(level_debug)
 	}
-	infoLogger = initLogger(INFO)
-	warnLogger = initLogger(WARNING)
-	errorLogger = initLogger(ERROR)
+	infoLogger = initLogger(level_info)
+	warnLogger = initLogger(level_warning)
+	errorLogger = initLogger(level_error)
 	logFileSliceTiming()
 }
 
@@ -96,19 +96,19 @@ func logFileSliceTiming()  {
 	c := cron.New()
 	spec := "0 0 0 * * *"
 	err := c.AddFunc(spec, func() {
-		if config.AppSetting.RunMode == "debug" && fileTimePassDaySlice(levelFlags[DEBUG]) {
-			debugLogger = initLogger(DEBUG)
+		if config.AppSetting.RunMode == "debug" && fileTimePassDaySlice(levelFlags[level_debug]) {
+			debugLogger = initLogger(level_debug)
 		}
-		if fileTimePassDaySlice(levelFlags[INFO]) {
-			infoLogger = initLogger(INFO)
+		if fileTimePassDaySlice(levelFlags[level_info]) {
+			infoLogger = initLogger(level_info)
 		}
-		if fileTimePassDaySlice(levelFlags[WARNING]) {
-			warnLogger = initLogger(WARNING)
+		if fileTimePassDaySlice(levelFlags[level_warning]) {
+			warnLogger = initLogger(level_warning)
 		}
-		if fileTimePassDaySlice(levelFlags[ERROR]) {
-			errorLogger = initLogger(ERROR)
+		if fileTimePassDaySlice(levelFlags[level_error]) {
+			errorLogger = initLogger(level_error)
 		}
-		if ginWriterCallback != nil && fileTimePassDaySlice(levelFlags[GIN]) {
+		if ginWriterCallback != nil && fileTimePassDaySlice(levelFlags[level_gin]) {
 			GinWriterGet(ginWriterCallback)
 		}
 	})
@@ -133,7 +133,7 @@ func GinWriterGet(callback GinWriterCallback)  {
 	}
 
 	var err error
-	ginWriter, err = openLogFile(getLogFileName(levelFlags[GIN]), getLogFilePath())
+	ginWriter, err = openLogFile(getLogFileName(levelFlags[level_gin]), getLogFilePath())
 	if err != nil {
 		log.Fatalln(err)
 	}

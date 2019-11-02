@@ -56,6 +56,13 @@ func (this *redisManagerImpl) Get(key string) (*string, error) {
 }
 
 /**
+ * 删除key
+ */
+func (this *redisManagerImpl) Delete(key string) {
+	client.Del(key)
+}
+
+/**
  * try lock
  */
 func (this *redisManagerImpl) TryLock(key string, expiration time.Duration) (result bool) {

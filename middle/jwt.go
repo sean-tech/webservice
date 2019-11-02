@@ -19,6 +19,7 @@ type Claims struct {
 }
 
 type IJwtManager interface {
+	SetJwtTokenStorage(tokenStorage IJwtTokenStorage)
 	GenerateToken(userId uint64, userName, password string, isAdministrotor bool) (string, error)
 	ParseToken(token string) (*Claims, error)
 	InterceptCheck() gin.HandlerFunc
@@ -34,6 +35,7 @@ var (
 func GetJwtManager() IJwtManager {
 	jwtManagerOnce.Do(func() {
 		jwtManager = new(jwtManagerImpl)
+		jwtManager.SetJwtTokenStorage(GetRedisTokenStorage())
 	})
 	return jwtManager
 }
@@ -45,17 +47,28 @@ var (
 	jwtSecret = []byte(config.AppSetting.JwtSecret)
 	// 发行者
 	jwtIssuer = config.AppSetting.JwtIssuer
-	// 用户token存储映射，用户当前token唯一性保证
-	userCurrentTokenMap sync.Map
+	// 过期时间
+	JwtExpiresTime = config.AppSetting.JwtExpiresTime
 )
 
-type jwtManagerImpl struct{}
+type jwtManagerImpl struct{
+	tokenStorage IJwtTokenStorage
+}
+
+/**
+ * 生成token
+ */
+func (this *jwtManagerImpl) SetJwtTokenStorage(tokenStorage IJwtTokenStorage) {
+	if this.tokenStorage != tokenStorage {
+		this.tokenStorage = tokenStorage
+	}
+}
 
 /**
  * 生成token
  */
 func (this *jwtManagerImpl) GenerateToken(userId uint64, userName, password string, isAdministrotor bool) (string, error) {
-	expireTime := time.Now().Add(3 * time.Hour)
+	expireTime := time.Now().Add(JwtExpiresTime)
 	c := Claims{
 		UserId:			userId,
 		UserName:       userName,
@@ -69,7 +82,7 @@ func (this *jwtManagerImpl) GenerateToken(userId uint64, userName, password stri
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
 	token, err := tokenClaims.SignedString(jwtSecret)
 	if err == nil {
-		userCurrentTokenMap.Store(userId, token)
+		this.tokenStorage.Store(userId, token, JwtExpiresTime)
 	}
 	return token, err
 }
@@ -127,7 +140,7 @@ func (this *jwtManagerImpl) InterceptCheck() gin.HandlerFunc {
 			return
 		}
 		// current token union judge
-		if savedToken, ok := userCurrentTokenMap.Load(claims.UserId); !ok || savedToken != token {
+		if savedToken, ok := this.tokenStorage.Load(claims.UserId); !ok || savedToken != token {
 			g.ResponseCode(service.STATUS_CODE_AUTH_CHECK_TOKEN_TIMEOUT, nil)
 			ctx.Abort()
 			return

@@ -26,7 +26,7 @@ var (
 	DefaultPrefix = ""
 	DefaultCallerDepth = 2
 
-	levelFlags = []string{"level_debug", "level_info", "WARN", "level_error", "level_gin"}
+	levelFlags = []string{"DEBUG", "INFO", "WARN", "ERROR", "GIN"}
 	lock sync.Mutex
 	debugLogger *log.Logger
 	infoLogger 	*log.Logger

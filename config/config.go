@@ -92,7 +92,7 @@ func Setup(configFilePath string) {
 	if err != nil {
 		log.Fatalf("Cfg.MapTo AppSetting err: %v", err)
 	}
-	AppSetting.JwtExpiresTime *= time.Hour
+	AppSetting.JwtExpiresTime = AppSetting.JwtExpiresTime * time.Hour
 
 	// LogSetting convert
 	err = Cfg.Section("log").MapTo(LogSetting)

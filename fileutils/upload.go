@@ -7,7 +7,7 @@ import (
 	"os"
 	"path"
 	"github.com/sean-tech/webservice/config"
-	"github.com/sean-tech/webservice/cryptutils"
+	"github.com/sean-tech/webservice/encrypt"
 	"strings"
 )
 
@@ -18,7 +18,7 @@ func GetUploadFileFullUrl(name string) string {
 func GetUploadFileName(name string) string {
 	ext := path.Ext(name)
 	fileName := strings.TrimSuffix(name, ext)
-	fileName = cryptutils.Md5.EncodeWithTimestamp(fileName)
+	fileName = encrypt.GetMd5Instance().EncryptWithTimestamp(fileName)
 	return fileName + ext
 }
 

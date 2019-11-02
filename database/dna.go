@@ -1,4 +1,4 @@
-package dbutils
+package database
 
 /**
  * 从用户名中获取基因数字

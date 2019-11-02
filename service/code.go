@@ -1,4 +1,4 @@
-package services
+package service
 
 type StatusCode int
 type StatusMsg string

@@ -1,6 +1,7 @@
-package services
+package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/rcrowley/go-metrics"
@@ -11,6 +12,7 @@ import (
 	"github.com/smallnest/rpcx/serverplugin"
 	"gopkg.in/go-playground/validator.v9"
 	"log"
+	"sync"
 	"time"
 )
 
@@ -53,21 +55,26 @@ func RegisterPluginEtcd(s *server.Server, serviceAddr string)  {
 	s.Plugins.Add(plugin)
 }
 
-var discovery client.ServiceDiscovery = nil
+var discoveryMap sync.Map
+func getDiscovery(servicePath string) *client.ServiceDiscovery {
+	if discovery, ok := discoveryMap.Load(servicePath); ok {
+		return discovery.(*client.ServiceDiscovery)
+	}
+	discovery := client.NewEtcdDiscovery(config.EtcdSetting.BasePath, servicePath, config.EtcdSetting.EndPoints, nil)
+	discoveryMap.Store(servicePath, &discovery)
+	return &discovery
+}
 
 /**
  * 创建rpc调用客户端，基于Etcd服务发现
  */
 func CreateXClient(servicePath string) client.XClient {
-	if discovery == nil {
-		discovery = client.NewEtcdDiscovery(config.EtcdSetting.BasePath, servicePath, config.EtcdSetting.EndPoints, nil)
-	}
 	option := client.DefaultOption
 	option.Heartbeat = true
 	option.HeartbeatInterval = time.Second
 	option.ReadTimeout = config.ServerSetting.ReadTimeout
 	option.WriteTimeout = config.ServerSetting.WriteTimeout
-	xclient := client.NewXClient(servicePath, client.Failover, client.RoundRobin, discovery, option)
+	xclient := client.NewXClient(servicePath, client.Failover, client.RoundRobin, *getDiscovery(servicePath), option)
 	return xclient
 }
 
@@ -75,35 +82,82 @@ func CreateXClient(servicePath string) client.XClient {
  * 参数绑定验证
  */
 func ValidParameter(parameter interface{}) error {
-
 	validate := validator.New()
 	err := validate.Struct(parameter)
-	
 	if err == nil {
 		return nil
 	}
-
 	if _, ok := err.(*validator.InvalidValidationError); ok {
 		logging.Warning(err)
 		fmt.Println(err)
 		return err
 	}
-
 	for _, err := range err.(validator.ValidationErrors) {
 		info := fmt.Sprintf("validate err.Namespace:%s Field:%s StructNamespace:%s StructField:%s Tag:%s ActualTag:%s Kind:%v Type:%v Value:%v Param:%s",
-			err.Namespace(),
-			err.Field(),
-			err.StructNamespace(),
-			err.StructField(),
-			err.Tag(),
-			err.ActualTag(),
-			err.Kind(),
-			err.Type(),
-			err.Value(),
-			err.Param(),
+			err.Namespace(), err.Field(), err.StructNamespace(), err.StructField(), err.Tag(), err.ActualTag(), err.Kind(), err.Type(), err.Value(), err.Param(),
 		)
 		logging.Warning(info)
 		return errors.New(fmt.Sprintf("the value %s of parameter filed %s, type %s not fit tag %s", err.Value(), err.Field(), err.Type(), err.Tag()))
 	}
 	return nil
+}
+
+
+
+const key_service_info = "key_service_info"
+
+/**
+ * 服务信息
+ */
+type ServiceInfo struct {
+	ServiceId uint64		`json:"serviceId"`
+	ServicePaths []string  	`json:"servicePath"`
+	UserId uint64 			`json:"userId"`
+	UserName string 		`json:"userName"`
+	Password string 		`json:"password"`
+	IsAdministrotor bool 	`json:"isAdministrotor"`
+}
+
+/**
+ * 新建context，并初始化info，绑定serviceId
+ */
+func NewServiceInfoContext(parentCtx context.Context) context.Context {
+	id, _ := GenerateId(config.AppSetting.WorkerId)
+	info := &ServiceInfo{
+		ServiceId:    uint64(id),
+		ServicePaths: make([]string, 5),
+		UserId:       0,
+		UserName:     "",
+		Password:     "",
+		IsAdministrotor:false,
+	}
+	return context.WithValue(parentCtx, key_service_info, info)
+}
+
+/**
+ * 信息获取，获取传输链上context绑定的用户服务信息
+ */
+func GetServiceInfo(ctx context.Context) *ServiceInfo {
+	obj := ctx.Value(key_service_info)
+	if info, ok := obj.(*ServiceInfo); ok {
+		return  info
+	}
+	return nil
+}
+
+/**
+ * 信息校验，token绑定的用户信息同参数传入信息校验，信息不一致说明恶意用户传他人数据渗透
+ */
+func CheckServiceInfo(ctx context.Context, userId uint64, userName string) bool {
+	info := GetServiceInfo(ctx)
+	if info == nil {
+		return false
+	}
+	if info.IsAdministrotor {
+		return true
+	}
+	if info.UserId != userId || info.UserName != userName {
+		return false
+	}
+	return true
 }

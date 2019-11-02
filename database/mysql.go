@@ -1,4 +1,4 @@
-package dbutils
+package database
 
 import (
 	"fmt"
@@ -7,14 +7,20 @@ import (
 	"github.com/sean-tech/webservice/config"
 )
 
-/** 数据中心id 关联 db Map **/
-var dbMap map[int]*sqlx.DB
+var (
+	/** 数据中心id 关联 db Map **/
+	dbMap map[int]*sqlx.DB
+	/** 数据中心数量 **/
+	dataCenterCount int = 1
+)
+
+type mysqlManagerImpl struct {}
 
 /**
  * 数据库open
  * db: DB 对象
  */
-func DatabaseOpen() {
+func (this *mysqlManagerImpl) Open() {
 	var (
 		dbType, dbName, user, password string
 	)
@@ -33,12 +39,14 @@ func DatabaseOpen() {
 		db.SetMaxOpenConns(config.DatabaseSetting.MaxOpen)
 		db.SetConnMaxLifetime(config.DatabaseSetting.MaxLifetime)
 		dbMap[id] = db
+		dataCenterCount += 1
 	}
 }
 
-const dataCenterCount int = 1
-
-func DbByUserName(userName string) (db *sqlx.DB, err error) {
+/**
+ * 根据用户名基因确定数据库对象
+ */
+func (this *mysqlManagerImpl) GetDbByUserName(userName string) (db *sqlx.DB, err error) {
 	dna, err := Dna(userName)
 	if err != nil {
 		return nil, err
@@ -47,7 +55,10 @@ func DbByUserName(userName string) (db *sqlx.DB, err error) {
 	return dbMap[dataCenterId], nil
 }
 
-func GetAllDbs() (dbs []*sqlx.DB) {
+/**
+ * 获取所有数据库对象
+ */
+func (this *mysqlManagerImpl) GetAllDbs() (dbs []*sqlx.DB) {
 	for _, v := range dbMap {
 		dbs = append(dbs, v)
 	}

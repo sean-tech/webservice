@@ -1,4 +1,4 @@
-package services
+package service
 
 import (
 	"context"
@@ -109,8 +109,6 @@ func (g *Gin) BindServiceInfo(serviceCtx context.Context)  {
 		serviceInfo.IsAdministrotor = isAdministrotor.(bool)
 	}
 }
-
-
 
 /**
  * 文件上传处理函数

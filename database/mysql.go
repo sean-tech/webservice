@@ -11,7 +11,7 @@ var (
 	/** 数据中心id 关联 db Map **/
 	dbMap map[int]*sqlx.DB
 	/** 数据中心数量 **/
-	dataCenterCount int = 1
+	dataCenterCount int = 0
 )
 
 type mysqlManagerImpl struct {}

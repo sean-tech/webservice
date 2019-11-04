@@ -7,12 +7,6 @@ import (
 	"time"
 )
 
-/** jwt token 存储接口 **/
-type IJwtTokenStorage interface {
-	Store(userId uint64, token string, expiresTime time.Duration)
-	Load(userId uint64) (token string, ok bool)
-	Delete(userId uint64)
-}
 
 var (
 	memeoryTokenStorageOnce sync.Once

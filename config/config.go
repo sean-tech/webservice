@@ -40,6 +40,8 @@ type serverSetting struct {
 	ServicePort int
 	ReadTimeout time.Duration
 	WriteTimeout time.Duration
+	RateLimitFillInterval time.Duration
+	RateLimitCapacity int64
 }
 var ServerSetting = &serverSetting{}
 
@@ -114,6 +116,7 @@ func Setup(configFilePath string) {
 	}
 	ServerSetting.ReadTimeout = ServerSetting.ReadTimeout * time.Second
 	ServerSetting.WriteTimeout = ServerSetting.ReadTimeout * time.Second
+	ServerSetting.RateLimitFillInterval = ServerSetting.RateLimitFillInterval *time.Second
 
 	// DatabaseSetting convert
 	err = Cfg.Section("database").MapTo(DatabaseSetting)

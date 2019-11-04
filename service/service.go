@@ -26,6 +26,7 @@ func ServiceServe(registerFunc ServiceRegisterFunc) {
 	address := fmt.Sprintf(":%d", config.ServerSetting.ServicePort)
 	s := server.NewServer()
 	RegisterPluginEtcd(s, address)
+	RegisterPluginRateLimit(s)
 	registerFunc(s)
 	go func() {
 		err := s.Serve("tcp", address)
@@ -52,6 +53,14 @@ func RegisterPluginEtcd(s *server.Server, serviceAddr string)  {
 	if err != nil {
 		log.Fatal(err)
 	}
+	s.Plugins.Add(plugin)
+}
+
+/**
+ * 注册插件，限流器
+ */
+func RegisterPluginRateLimit(s *server.Server)  {
+	plugin := serverplugin.NewRateLimitingPlugin(config.ServerSetting.RateLimitFillInterval, config.ServerSetting.RateLimitCapacity)
 	s.Plugins.Add(plugin)
 }
 

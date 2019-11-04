@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"log"
 	"sync"
 	"time"
 )
@@ -75,14 +76,25 @@ func (w *Worker) GetId() int64 {
 	return ID
 }
 
-func GenerateId(workerId int64) (int64, error) {
-	// 生成节点实例
-	worker, err := NewWorker(workerId)
+var (
+	workerOnce sync.Once
+	workerInstance *Worker
+)
 
+func GenerateId(workerId int64) (int64, error) {
+
+	var err error
+	workerOnce.Do(func() {
+		// 生成节点实例
+		workerInstance, err = NewWorker(workerId)
+		if err != nil {
+			log.Panic(err)
+		}
+	})
 	if err != nil {
 		fmt.Println(err)
 		return 0, fmt.Errorf("generate id worker created failed")
 	}
-	id := worker.GetId()
+	id := workerInstance.GetId()
 	return id, nil
 }

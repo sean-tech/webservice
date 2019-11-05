@@ -62,8 +62,8 @@ func RegisterPluginEtcd(s *server.Server, serviceAddr string)  {
  * 注册插件，限流器
  */
 func RegisterPluginRateLimit(s *server.Server)  {
-	plugin := serverplugin.NewRateLimitingPlugin(config.ServerSetting.RateLimitFillInterval, config.ServerSetting.RateLimitCapacity)
-	s.Plugins.Add(plugin)
+	//plugin := serverplugin.NewRateLimitingPlugin(config.ServerSetting.RateLimitFillInterval, config.ServerSetting.RateLimitCapacity)
+	//s.Plugins.Add(plugin)
 	s.Plugins.Add(new(ServerRateLimitPlugin))
 }
 

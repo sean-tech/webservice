@@ -116,7 +116,7 @@ func Setup(configFilePath string) {
 	}
 	ServerSetting.ReadTimeout = ServerSetting.ReadTimeout * time.Second
 	ServerSetting.WriteTimeout = ServerSetting.ReadTimeout * time.Second
-	ServerSetting.RateLimitFillInterval = ServerSetting.RateLimitFillInterval *time.Second
+	ServerSetting.RateLimitFillInterval = ServerSetting.RateLimitFillInterval *time.Millisecond
 
 	// DatabaseSetting convert
 	err = Cfg.Section("database").MapTo(DatabaseSetting)

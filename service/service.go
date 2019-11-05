@@ -8,6 +8,7 @@ import (
 	"github.com/sean-tech/webservice/config"
 	"github.com/sean-tech/webservice/logging"
 	"github.com/smallnest/rpcx/client"
+	"github.com/smallnest/rpcx/protocol"
 	"github.com/smallnest/rpcx/server"
 	"github.com/smallnest/rpcx/serverplugin"
 	"gopkg.in/go-playground/validator.v9"
@@ -68,6 +69,12 @@ func RegisterPluginRateLimit(s *server.Server)  {
 type ServerRateLimitPlugin struct{}
 func (this *ServerRateLimitPlugin) PreReadRequest(ctx context.Context) error {
 	logging.Debug(ctx)
+	return nil
+}
+
+func (this *ServerRateLimitPlugin) PreHandleRequest(ctx context.Context, r *protocol.Message) error {
+	logging.Debug(ctx)
+	logging.Debug(*r)
 	return nil
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/juju/ratelimit"
 	"github.com/rcrowley/go-metrics"
 	"github.com/sean-tech/webservice/config"
 	"github.com/sean-tech/webservice/logging"
@@ -66,15 +67,27 @@ func RegisterPluginRateLimit(s *server.Server)  {
 	s.Plugins.Add(new(ServerRateLimitPlugin))
 }
 
+var (
+	tokenBucketOnce sync.Once
+	tokenBucket		*ratelimit.Bucket
+)
+
+func getTokenBucket() *ratelimit.Bucket {
+	tokenBucketOnce.Do(func() {
+		tokenBucket	= ratelimit.NewBucket(config.ServerSetting.RateLimitFillInterval, config.ServerSetting.RateLimitCapacity)
+	})
+	return tokenBucket
+}
+
 type ServerRateLimitPlugin struct{}
 func (this *ServerRateLimitPlugin) PreReadRequest(ctx context.Context) error {
-	logging.Debug(ctx)
+	if getTokenBucket().TakeAvailable(1) <= 0 {
+		return errors.New("服务访问流量已满，请稍后重试\nService access traffic is full, please try again later")
+	}
 	return nil
 }
 
 func (this *ServerRateLimitPlugin) PreHandleRequest(ctx context.Context, r *protocol.Message) error {
-	logging.Debug(ctx)
-	logging.Debug(*r)
 	return nil
 }
 

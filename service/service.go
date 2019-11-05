@@ -62,6 +62,13 @@ func RegisterPluginEtcd(s *server.Server, serviceAddr string)  {
 func RegisterPluginRateLimit(s *server.Server)  {
 	plugin := serverplugin.NewRateLimitingPlugin(config.ServerSetting.RateLimitFillInterval, config.ServerSetting.RateLimitCapacity)
 	s.Plugins.Add(plugin)
+	s.Plugins.Add(new(ServerRateLimitPlugin))
+}
+
+type ServerRateLimitPlugin struct{}
+func (this *ServerRateLimitPlugin) PreReadRequest(ctx context.Context) error {
+	logging.Debug(ctx)
+	return nil
 }
 
 var discoveryMap sync.Map

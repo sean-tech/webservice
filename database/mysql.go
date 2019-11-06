@@ -4,9 +4,7 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"github.com/juju/ratelimit"
 	"github.com/sean-tech/webservice/config"
-	"sync"
 )
 
 var (
@@ -67,15 +65,15 @@ func (this *mysqlManagerImpl) GetAllDbs() (dbs []*sqlx.DB) {
 	return dbs
 }
 
-var (
-	tokenBucketOnce sync.Once
-	tokenBucket		*ratelimit.Bucket
-)
-
-func getTokenBucket() *ratelimit.Bucket {
-	tokenBucketOnce.Do(func() {
-		tokenBucket	= ratelimit.NewBucket(config.Server.RateLimitFillInterval, config.Server.RateLimitCapacity)
-	})
-	return tokenBucket
-}
+//var (
+//	tokenBucketOnce sync.Once
+//	tokenBucket		*ratelimit.Bucket
+//)
+//
+//func getTokenBucket() *ratelimit.Bucket {
+//	tokenBucketOnce.Do(func() {
+//		tokenBucket	= ratelimit.NewBucket(config.Server.RateLimitFillInterval, config.Server.RateLimitCapacity)
+//	})
+//	return tokenBucket
+//}
 

@@ -12,7 +12,7 @@ import (
 )
 
 func GetUploadFileFullUrl(name string) string {
-	return config.UploadSetting.FilePrefixUrl + "/" + config.UploadSetting.FileSavePath + name
+	return config.Upload.FilePrefixUrl + "/" + config.Upload.FileSavePath + name
 }
 
 func GetUploadFileName(name string) string {
@@ -23,16 +23,16 @@ func GetUploadFileName(name string) string {
 }
 
 func GetUploadFilePath() string {
-	return config.UploadSetting.FileSavePath
+	return config.Upload.FileSavePath
 }
 
 func GetUploadFileFullPath() string {
-	return config.AppSetting.RuntimeRootPath + config.UploadSetting.FileSavePath
+	return config.App.RuntimeRootPath + config.Upload.FileSavePath
 }
 
 func CheckUploadFileExt(fileName string) bool {
 	ext := GetExt(fileName)
-	for _, allowExt := range config.UploadSetting.FileAllowExts {
+	for _, allowExt := range config.Upload.FileAllowExts {
 		if strings.ToUpper(allowExt) == strings.ToUpper(ext) {
 			return true
 		}
@@ -47,7 +47,7 @@ func CheckUploadFileSize(f multipart.File) bool {
 		return false
 	}
 
-	return size <= config.UploadSetting.FileMaxSize
+	return size <= config.Upload.FileMaxSize
 }
 
 func CheckUploadFile(src string) error {

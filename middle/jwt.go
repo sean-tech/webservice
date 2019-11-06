@@ -74,7 +74,7 @@ func (this *jwtManagerImpl) SetJwtTokenStorage(tokenStorage IJwtTokenStorage) {
  * 生成token
  */
 func (this *jwtManagerImpl) GenerateToken(userId uint64, userName, password string, isAdministrotor bool) (string, error) {
-	expireTime := time.Now().Add(config.AppSetting.JwtExpiresTime)
+	expireTime := time.Now().Add(config.App.JwtExpiresTime)
 	c := Claims{
 		UserId:			userId,
 		UserName:       userName,
@@ -82,13 +82,13 @@ func (this *jwtManagerImpl) GenerateToken(userId uint64, userName, password stri
 		IsAdministrotor:isAdministrotor,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(),
-			Issuer:    config.AppSetting.JwtIssuer,
+			Issuer:    config.App.JwtIssuer,
 		},
 	}
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
-	token, err := tokenClaims.SignedString([]byte(config.AppSetting.JwtSecret))
+	token, err := tokenClaims.SignedString([]byte(config.App.JwtSecret))
 	if err == nil {
-		this.tokenStorage.Store(userId, token, config.AppSetting.JwtExpiresTime)
+		this.tokenStorage.Store(userId, token, config.App.JwtExpiresTime)
 	}
 	return token, err
 }
@@ -98,7 +98,7 @@ func (this *jwtManagerImpl) GenerateToken(userId uint64, userName, password stri
  */
 func (this *jwtManagerImpl) ParseToken(token string) (*Claims, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.AppSetting.JwtSecret), nil
+		return []byte(config.App.JwtSecret), nil
 	})
 	if err != nil {
 		return nil, err
@@ -113,7 +113,7 @@ func (this *jwtManagerImpl) ParseToken(token string) (*Claims, error) {
 	if !ok {
 		return nil, errors.New("token parse failed")
 	}
-	if claims.Issuer != config.AppSetting.JwtIssuer {
+	if claims.Issuer != config.App.JwtIssuer {
 		return nil, errors.New("token parsed issuer not right")
 	}
 	return claims, nil

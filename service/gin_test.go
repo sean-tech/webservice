@@ -27,18 +27,18 @@ func TestGinServer(t *testing.T) {
 	config.Setup(*config_file_path)
 	logging.Setup()
 	// server start
-	ServerServe(InitRouter())
+	HttpServerServe(InitRouter())
 }
 
 func InitRouter() *gin.Engine {
-	gin.SetMode(config.AppSetting.RunMode)
+	gin.SetMode(config.App.RunMode)
 	gin.DisableConsoleColor()
 	logging.GinWriterGet(func(writer io.Writer) {
 		gin.DefaultWriter = io.MultiWriter(writer, os.Stdout)
 		logging.Debug(writer)
 	})
 	r := gin.Default()
-	r.StaticFS(config.UploadSetting.FileSavePath, http.Dir(fileutils.GetUploadFilePath()))
+	r.StaticFS(config.Upload.FileSavePath, http.Dir(fileutils.GetUploadFilePath()))
 
 	apiv1 := r.Group("api/order/v1")
 	{

@@ -8,78 +8,77 @@ import (
 	"time"
 )
 
-type appSetting struct {
-	RunMode string
-	Module string
-	WorkerId int64
+type appConfig struct {
+	RunMode 		string
+	Module 			string
+	WorkerId 		int64
 	RuntimeRootPath string
-	JwtSecret string
-	JwtIssuer string
-	JwtExpiresTime time.Duration
+	JwtSecret 		string
+	JwtIssuer 		string
+	JwtExpiresTime 	time.Duration
 }
-var AppSetting = &appSetting{}
+var App = &appConfig{}
 
-type logSetting struct {
+type logConfig struct {
 	LogSavePath string
 	LogSaveName string
-	LogFileExt string
-	TimeFormat string
+	LogFileExt 	string
+	TimeFormat 	string
 }
-var LogSetting = &logSetting{}
+var Log = &logConfig{}
 
-type uploadSetting struct {
-	FilePrefixUrl string
-	FileSavePath string
-	FileMaxSize int
-	FileAllowExts []string
+type uploadConfig struct {
+	FilePrefixUrl	string
+	FileSavePath 	string
+	FileMaxSize 	int
+	FileAllowExts 	[]string
 }
-var UploadSetting = &uploadSetting{}
+var Upload = &uploadConfig{}
 
-type serverSetting struct {
-	ApiPort int
-	ServicePort int
-	ReadTimeout time.Duration
-	WriteTimeout time.Duration
-	RateLimitFillInterval time.Duration
-	RateLimitCapacity int64
+type serverConfig struct {
+	HttpPort              int
+	RpcPort               int
+	ReadTimeout           time.Duration
+	WriteTimeout          time.Duration
+	RpcPerSecondConnIdle  int64
 }
-var ServerSetting = &serverSetting{}
+var Server = &serverConfig{}
 
-type databaseSetting struct {
-	Type string
-	User string
-	Password string
-	HostStr string
-	Hosts map[int]string
-	Name string
-	MaxIdle int
-	MaxOpen int
+type databaseConfig struct {
+	Type 		string
+	User 		string
+	Password 	string
+	HostStr 	string
+	Hosts 		map[int]string
+	Name 		string
+	MaxIdle 	int
+	MaxOpen 	int
 	MaxLifetime time.Duration
 }
-var DatabaseSetting = &databaseSetting{}
+var Database = &databaseConfig{}
 
-type redis struct {
+type redisConfig struct {
 	Host        string
 	Password    string
 	MaxIdle     int
 	MaxActive   int
 	IdleTimeout time.Duration
 }
-var RedisSetting = &redis{}
+var Redis = &redisConfig{}
 
-type etcdSetting struct {
-	KeyPrefix string
-	BasePath string
+type etcdConfig struct {
+	KeyPrefix 	string
+	BasePath 	string
 	EndPointStr string
-	EndPoints []string
+	EndPoints 	[]string
 }
-var EtcdSetting = &etcdSetting{}
+var Etcd = &etcdConfig{}
 
-type kafkaSetting struct {
-	AddressStr string
-	Address []string
+type kafkaConfig struct {
+	AddressStr 	string
+	Address 	[]string
 }
-var KafkaSetting = &kafkaSetting{}
+var Kafka = &kafkaConfig{}
 
 
 func Setup(configFilePath string) {
@@ -89,68 +88,67 @@ func Setup(configFilePath string) {
 		log.Fatalf("Fail to parse 'config.ini': %v", err)
 	}
 
-	// AppSetting convert
-	err = Cfg.Section("app").MapTo(AppSetting)
+	// App convert
+	err = Cfg.Section("appConfig").MapTo(App)
 	if err != nil {
-		log.Fatalf("Cfg.MapTo AppSetting err: %v", err)
+		log.Fatalf("Cfg.MapTo App err: %v", err)
 	}
-	AppSetting.JwtExpiresTime = AppSetting.JwtExpiresTime * time.Hour
+	App.JwtExpiresTime = App.JwtExpiresTime * time.Hour
 
-	// LogSetting convert
-	err = Cfg.Section("log").MapTo(LogSetting)
+	// Log convert
+	err = Cfg.Section("log").MapTo(Log)
 	if err != nil {
-		log.Fatalf("Cfg.MapTo LogSetting err: %v", err)
+		log.Fatalf("Cfg.MapTo Log err: %v", err)
 	}
 
-	// UploadSetting convert
-	err = Cfg.Section("upload").MapTo(UploadSetting)
+	// Upload convert
+	err = Cfg.Section("upload").MapTo(Upload)
 	if err != nil {
-		log.Fatalf("Cfg.MapTo UploadSetting err: %v", err)
+		log.Fatalf("Cfg.MapTo Upload err: %v", err)
 	}
-	UploadSetting.FileMaxSize = UploadSetting.FileMaxSize * 1024 * 1024
+	Upload.FileMaxSize = Upload.FileMaxSize * 1024 * 1024
 
-	// ServerSetting convert
-	err = Cfg.Section("server").MapTo(ServerSetting)
+	// Server convert
+	err = Cfg.Section("server").MapTo(Server)
 	if err != nil {
-		log.Fatalf("Cfg.MapTo ServerSetting err: %v", err)
+		log.Fatalf("Cfg.MapTo Server err: %v", err)
 	}
-	ServerSetting.ReadTimeout = ServerSetting.ReadTimeout * time.Second
-	ServerSetting.WriteTimeout = ServerSetting.ReadTimeout * time.Second
-	ServerSetting.RateLimitFillInterval = ServerSetting.RateLimitFillInterval *time.Millisecond
+	Server.ReadTimeout = Server.ReadTimeout * time.Second
+	Server.WriteTimeout = Server.ReadTimeout * time.Second
 
-	// DatabaseSetting convert
-	err = Cfg.Section("database").MapTo(DatabaseSetting)
+	// Database convert
+	err = Cfg.Section("database").MapTo(Database)
 	if err != nil {
-		log.Fatalf("Cfg.MapTo DatabaseSetting err: %v", err)
+		log.Fatalf("Cfg.MapTo Database err: %v", err)
 	}
-	DatabaseSetting.MaxLifetime = DatabaseSetting.MaxLifetime * time.Second
-	idHosts := strings.Split(DatabaseSetting.HostStr, ", ")
-	DatabaseSetting.Hosts = make(map[int]string, len(idHosts))
+	Database.MaxLifetime = Database.MaxLifetime * time.Second
+	idHosts := strings.Split(Database.HostStr, ", ")
+	Database.Hosts = make(map[int]string, len(idHosts))
 	for _, idHost := range idHosts {
 		seps := strings.Split(idHost, "-")
 		id, _ := strconv.Atoi(seps[0])
 		host := seps[1]
-		DatabaseSetting.Hosts[id] = host
+		Database.Hosts[id] = host
 	}
 
-	// RedisSetting convert
-	err = Cfg.Section("redis").MapTo(RedisSetting)
+	// Redis convert
+	err = Cfg.Section("redisConfig").MapTo(Redis)
 	if err != nil {
-		log.Fatalf("Cfg.MapTo RedisSetting err: %v", err)
+		log.Fatalf("Cfg.MapTo Redis err: %v", err)
 	}
-	RedisSetting.IdleTimeout = RedisSetting.IdleTimeout * time.Second
+	Redis.IdleTimeout = Redis.IdleTimeout * time.Second
 
-	// etcdSetting convert
-	err = Cfg.Section("etcd").MapTo(EtcdSetting)
+	// etcdConfig convert
+	err = Cfg.Section("etcd").MapTo(Etcd)
 	if err != nil {
-		log.Fatalf("Cfg.MapTo RedisSetting err: %v", err)
+		log.Fatalf("Cfg.MapTo Redis err: %v", err)
 	}
-	EtcdSetting.EndPoints = strings.Split(EtcdSetting.EndPointStr, ", ")
+	Etcd.EndPoints = strings.Split(Etcd.EndPointStr, ", ")
 
-	// kafkaSetting convert
-	err = Cfg.Section("kafka").MapTo(KafkaSetting)
+	// kafkaConfig convert
+	err = Cfg.Section("kafka").MapTo(Kafka)
 	if err != nil {
-		log.Fatalf("Cfg.MapTo RedisSetting err: %v", err)
+		log.Fatalf("Cfg.MapTo Redis err: %v", err)
 	}
-	KafkaSetting.Address = strings.Split(KafkaSetting.AddressStr, ", ")
+	Kafka.Address = strings.Split(Kafka.AddressStr, ", ")
 }

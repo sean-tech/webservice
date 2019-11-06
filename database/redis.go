@@ -16,10 +16,10 @@ type redisManagerImpl struct {}
  */
 func (this *redisManagerImpl) Open() {
 	client = redis.NewClient(&redis.Options{
-		Addr:     config.RedisSetting.Host,
-		Password: config.RedisSetting.Password,
+		Addr:     config.Redis.Host,
+		Password: config.Redis.Password,
 		DB:       0,  // use default DB
-		IdleTimeout:config.RedisSetting.IdleTimeout,
+		IdleTimeout:config.Redis.IdleTimeout,
 	})
 	pong, err := client.Ping().Result()
 	fmt.Println(pong, err)

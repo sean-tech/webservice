@@ -4,12 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/juju/ratelimit"
 	"github.com/rcrowley/go-metrics"
 	"github.com/sean-tech/webservice/config"
 	"github.com/sean-tech/webservice/logging"
 	"github.com/smallnest/rpcx/client"
-	"github.com/smallnest/rpcx/protocol"
 	"github.com/smallnest/rpcx/server"
 	"github.com/smallnest/rpcx/serverplugin"
 	"gopkg.in/go-playground/validator.v9"
@@ -19,13 +17,13 @@ import (
 )
 
 /** 服务注册回调函数 **/
-type ServiceRegisterFunc func(server *server.Server)
+type RpcRegisterFunc func(server *server.Server)
 /**
  * 启动 服务server
  * registerFunc 服务注册回调函数
  */
-func ServiceServe(registerFunc ServiceRegisterFunc) {
-	address := fmt.Sprintf(":%d", config.ServerSetting.ServicePort)
+func RpcServerServe(registerFunc RpcRegisterFunc) {
+	address := fmt.Sprintf(":%d", config.Server.RpcPort)
 	s := server.NewServer()
 	RegisterPluginEtcd(s, address)
 	RegisterPluginRateLimit(s)
@@ -44,8 +42,8 @@ func ServiceServe(registerFunc ServiceRegisterFunc) {
 func RegisterPluginEtcd(s *server.Server, serviceAddr string)  {
 	plugin := &serverplugin.EtcdRegisterPlugin{
 		ServiceAddress: "tcp@" + serviceAddr,
-		EtcdServers:    config.EtcdSetting.EndPoints,
-		BasePath:       config.EtcdSetting.BasePath,
+		EtcdServers:    config.Etcd.EndPoints,
+		BasePath:       config.Etcd.BasePath,
 		Metrics:        metrics.NewRegistry(),
 		Services:       nil,
 		UpdateInterval: time.Minute,
@@ -59,36 +57,12 @@ func RegisterPluginEtcd(s *server.Server, serviceAddr string)  {
 }
 
 /**
- * 注册插件，限流器
+ * 注册插件，限流器，限制客户端连接数
  */
 func RegisterPluginRateLimit(s *server.Server)  {
-	//plugin := serverplugin.NewRateLimitingPlugin(config.ServerSetting.RateLimitFillInterval, config.ServerSetting.RateLimitCapacity)
-	//s.Plugins.Add(plugin)
-	s.Plugins.Add(new(ServerRateLimitPlugin))
-}
-
-var (
-	tokenBucketOnce sync.Once
-	tokenBucket		*ratelimit.Bucket
-)
-
-func getTokenBucket() *ratelimit.Bucket {
-	tokenBucketOnce.Do(func() {
-		tokenBucket	= ratelimit.NewBucket(config.ServerSetting.RateLimitFillInterval, config.ServerSetting.RateLimitCapacity)
-	})
-	return tokenBucket
-}
-
-type ServerRateLimitPlugin struct{}
-func (this *ServerRateLimitPlugin) PreReadRequest(ctx context.Context) error {
-	if getTokenBucket().TakeAvailable(1) <= 0 {
-		return errors.New("服务访问流量已满，请稍后重试\nService access traffic is full, please try again later")
-	}
-	return nil
-}
-
-func (this *ServerRateLimitPlugin) PreHandleRequest(ctx context.Context, r *protocol.Message) error {
-	return nil
+	var fillInterval time.Duration = 1 / time.Duration(config.Server.RpcPerSecondConnIdle) * time.Second
+	plugin := serverplugin.NewRateLimitingPlugin(fillInterval, config.Server.RpcPerSecondConnIdle)
+	s.Plugins.Add(plugin)
 }
 
 var discoveryMap sync.Map
@@ -96,7 +70,7 @@ func getDiscovery(servicePath string) *client.ServiceDiscovery {
 	if discovery, ok := discoveryMap.Load(servicePath); ok {
 		return discovery.(*client.ServiceDiscovery)
 	}
-	discovery := client.NewEtcdDiscovery(config.EtcdSetting.BasePath, servicePath, config.EtcdSetting.EndPoints, nil)
+	discovery := client.NewEtcdDiscovery(config.Etcd.BasePath, servicePath, config.Etcd.EndPoints, nil)
 	discoveryMap.Store(servicePath, &discovery)
 	return &discovery
 }
@@ -104,12 +78,12 @@ func getDiscovery(servicePath string) *client.ServiceDiscovery {
 /**
  * 创建rpc调用客户端，基于Etcd服务发现
  */
-func CreateXClient(servicePath string) client.XClient {
+func CreateRpcClient(servicePath string) client.XClient {
 	option := client.DefaultOption
 	option.Heartbeat = true
 	option.HeartbeatInterval = time.Second
-	option.ReadTimeout = config.ServerSetting.ReadTimeout
-	option.WriteTimeout = config.ServerSetting.WriteTimeout
+	option.ReadTimeout = config.Server.ReadTimeout
+	option.WriteTimeout = config.Server.WriteTimeout
 	xclient := client.NewXClient(servicePath, client.Failover, client.RoundRobin, *getDiscovery(servicePath), option)
 	return xclient
 }
@@ -158,7 +132,7 @@ type ServiceInfo struct {
  * 新建context，并初始化info，绑定serviceId
  */
 func NewServiceInfoContext(parentCtx context.Context) context.Context {
-	id, _ := GenerateId(config.AppSetting.WorkerId)
+	id, _ := GenerateId(config.App.WorkerId)
 	info := &ServiceInfo{
 		ServiceId:    uint64(id),
 		ServicePaths: make([]string, 5),

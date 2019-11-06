@@ -18,13 +18,13 @@ import (
  * 启动 api server
  * handler: 接口实现serveHttp的对象
  */
-func ServerServe(handler http.Handler) {
+func HttpServerServe(handler http.Handler) {
 	// server
 	s := http.Server{
-		Addr:           fmt.Sprintf(":%d", config.ServerSetting.ApiPort),
+		Addr:           fmt.Sprintf(":%d", config.Server.HttpPort),
 		Handler:        handler,
-		ReadTimeout:    config.ServerSetting.ReadTimeout,
-		WriteTimeout:   config.ServerSetting.WriteTimeout,
+		ReadTimeout:    config.Server.ReadTimeout,
+		WriteTimeout:   config.Server.WriteTimeout,
 		MaxHeaderBytes: 1 << 20,
 	}
 	go func() {

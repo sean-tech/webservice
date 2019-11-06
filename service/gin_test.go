@@ -8,12 +8,9 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sean-tech/webservice/config"
-	"github.com/sean-tech/webservice/fileutils"
 	"github.com/sean-tech/webservice/logging"
-	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"testing"
 )
 
@@ -27,25 +24,14 @@ func TestGinServer(t *testing.T) {
 	config.Setup(*config_file_path)
 	logging.Setup()
 	// server start
-	HttpServerServe(InitRouter())
+	HttpServerServe(ginApiRegister)
 }
 
-func InitRouter() *gin.Engine {
-	gin.SetMode(config.App.RunMode)
-	gin.DisableConsoleColor()
-	logging.GinWriterGet(func(writer io.Writer) {
-		gin.DefaultWriter = io.MultiWriter(writer, os.Stdout)
-		logging.Debug(writer)
-	})
-	r := gin.Default()
-	r.StaticFS(config.Upload.FileSavePath, http.Dir(fileutils.GetUploadFilePath()))
-
-	apiv1 := r.Group("api/order/v1")
+func ginApiRegister(engine *gin.Engine) {
+	apiv1 := engine.Group("api/order/v1")
 	{
 		apiv1.POST("/bindtest", bindtest)
 	}
-
-	return r
 }
 
 func bindtest(ctx *gin.Context)  {

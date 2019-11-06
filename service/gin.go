@@ -7,6 +7,7 @@ import (
 	"github.com/sean-tech/webservice/config"
 	"github.com/sean-tech/webservice/fileutils"
 	"github.com/sean-tech/webservice/logging"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -14,15 +15,28 @@ import (
 	"time"
 )
 
+/** 服务注册回调函数 **/
+type GinRegisterFunc func(engine *gin.Engine)
+
 /**
  * 启动 api server
  * handler: 接口实现serveHttp的对象
  */
-func HttpServerServe(handler http.Handler) {
+func HttpServerServe(registerFunc GinRegisterFunc) {
+	// gin
+	gin.SetMode(config.App.RunMode)
+	gin.DisableConsoleColor()
+	logging.GinWriterGet(func(writer io.Writer) {
+		gin.DefaultWriter = io.MultiWriter(writer, os.Stdout)
+		logging.Debug(writer)
+	})
+	engine := gin.Default()
+	engine.StaticFS(config.Upload.FileSavePath, http.Dir(fileutils.GetUploadFilePath()))
+	registerFunc(engine)
 	// server
 	s := http.Server{
 		Addr:           fmt.Sprintf(":%d", config.Server.HttpPort),
-		Handler:        handler,
+		Handler:        engine,
 		ReadTimeout:    config.Server.ReadTimeout,
 		WriteTimeout:   config.Server.WriteTimeout,
 		MaxHeaderBytes: 1 << 20,

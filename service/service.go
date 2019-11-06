@@ -12,6 +12,7 @@ import (
 	"github.com/smallnest/rpcx/serverplugin"
 	"gopkg.in/go-playground/validator.v9"
 	"log"
+	"math"
 	"sync"
 	"time"
 )
@@ -60,7 +61,8 @@ func RegisterPluginEtcd(s *server.Server, serviceAddr string)  {
  * 注册插件，限流器，限制客户端连接数
  */
 func RegisterPluginRateLimit(s *server.Server)  {
-	var fillInterval time.Duration = 1 / time.Duration(config.Server.RpcPerSecondConnIdle) * time.Second
+	var fillSpeed float64 = 1.0 / float64(config.Server.RpcPerSecondConnIdle)
+	fillInterval := time.Duration(fillSpeed * math.Pow(10, 9))
 	plugin := serverplugin.NewRateLimitingPlugin(fillInterval, config.Server.RpcPerSecondConnIdle)
 	s.Plugins.Add(plugin)
 }

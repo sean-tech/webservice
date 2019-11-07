@@ -89,7 +89,7 @@ func Setup(configFilePath string) {
 	}
 
 	// App convert
-	err = Cfg.Section("appConfig").MapTo(App)
+	err = Cfg.Section("app").MapTo(App)
 	if err != nil {
 		log.Fatalf("Cfg.MapTo App err: %v", err)
 	}
@@ -132,7 +132,7 @@ func Setup(configFilePath string) {
 	}
 
 	// Redis convert
-	err = Cfg.Section("redisConfig").MapTo(Redis)
+	err = Cfg.Section("redis").MapTo(Redis)
 	if err != nil {
 		log.Fatalf("Cfg.MapTo Redis err: %v", err)
 	}

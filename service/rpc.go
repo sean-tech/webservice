@@ -94,7 +94,17 @@ func CreateRpcClient(servicePath string) client.XClient {
  * 参数绑定验证
  */
 func ValidParameter(parameter interface{}) error {
+	return ValidParameterWithRegisterFunc(parameter, "", nil)
+}
+
+/**
+* 参数绑定验证，自定义验证函数注册
+*/
+func ValidParameterWithRegisterFunc(parameter interface{}, tag string, fn validator.Func) error {
 	validate := validator.New()
+	if len(tag) < 0  && fn != nil {
+		validate.RegisterValidation(tag, fn)
+	}
 	err := validate.Struct(parameter)
 	if err == nil {
 		return nil

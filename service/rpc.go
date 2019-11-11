@@ -13,6 +13,8 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 	"log"
 	"math"
+	"reflect"
+	"regexp"
 	"sync"
 	"time"
 )
@@ -102,24 +104,43 @@ func ValidParameter(parameter interface{}) error {
 */
 func ValidParameterWithRegisterFunc(parameter interface{}, tag string, fn validator.Func) error {
 	validate := validator.New()
+
+	// regexp
+	s := reflect.TypeOf(parameter).Elem()
+	v := reflect.ValueOf(parameter).Elem()
+	for i := 0; i < s.NumField(); i++ {
+		pattern := s.Field(i).Tag.Get("regexp")
+		if len(pattern) <= 0 {
+			continue
+		}
+		filedName := s.Field(i).Name
+		ok, err := regexp.MatchString(pattern, v.FieldByName(filedName).String())
+		if err != nil || !ok {
+			logging.Warning(err.Error())
+			return errors.New(STATUS_MSG_INVALID_PARAMS)
+		}
+	}
+
+	// register validation func
 	if len(tag) < 0  && fn != nil {
 		validate.RegisterValidation(tag, fn)
 	}
+
+	// validate
 	err := validate.Struct(parameter)
 	if err == nil {
 		return nil
 	}
 	if _, ok := err.(*validator.InvalidValidationError); ok {
 		logging.Warning(err)
-		fmt.Println(err)
-		return err
+		return errors.New(STATUS_MSG_INVALID_PARAMS)
 	}
 	for _, err := range err.(validator.ValidationErrors) {
 		info := fmt.Sprintf("validate err.Namespace:%s Field:%s StructNamespace:%s StructField:%s Tag:%s ActualTag:%s Kind:%v Type:%v Value:%v Param:%s",
 			err.Namespace(), err.Field(), err.StructNamespace(), err.StructField(), err.Tag(), err.ActualTag(), err.Kind(), err.Type(), err.Value(), err.Param(),
 		)
 		logging.Warning(info)
-		return errors.New(fmt.Sprintf("the value %s of parameter filed %s, type %s not fit tag %s", err.Value(), err.Field(), err.Type(), err.Tag()))
+		return errors.New(STATUS_MSG_INVALID_PARAMS)
 	}
 	return nil
 }

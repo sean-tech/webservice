@@ -27,7 +27,7 @@ const (
 	_ StatusMsg = ""
 	// base
 	STATUS_MSG_SUCCESS        = "ok"
-	STATUS_MSG_INVALID_PARAMS = "请求参数错误"
+	STATUS_MSG_INVALID_PARAMS = "参数校验失败"
 	STATUS_MSG_ERROR          = "system error"
 	STATUS_MSG_FAILED         = "操作失败"
 

@@ -7,7 +7,7 @@ import (
 
 type User struct {
 	UserId int						`json:"user_id" validate:"required,min=1"`
-	UserName string					`json:"user_name" validate:"required,len=11"`
+	UserName string					`json:"user_name" validate:"required" regexp:"^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$|^1(3[0-9]|4[5,7]|5[0,1,2,3,5,6,7,8,9]|6[2,5,6,7]|7[0,1,7,8]|8[0-9]|9[1,8,9])\\d{8}$"`
 	Email string					`json:"email" validate:"required,email"`
 }
 
@@ -107,4 +107,18 @@ func TestValidParameter(t *testing.T) {
 		}
 	}
 
+}
+
+func TestValdParameter2(t *testing.T) {
+	user := &User{
+		UserId:   102,
+		UserName: "18922311001@qq.com",
+		Email:    "102@qq.com",
+	}
+	err := ValidParameter(user)
+	if err != nil {
+		t.Errorf("parameter validate failed: %v\n", err)
+	} else  {
+		t.Errorf("parameter validate success\n")
+	}
 }

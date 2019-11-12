@@ -2,19 +2,14 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/rcrowley/go-metrics"
 	"github.com/sean-tech/webservice/config"
-	"github.com/sean-tech/webservice/logging"
 	"github.com/smallnest/rpcx/client"
 	"github.com/smallnest/rpcx/server"
 	"github.com/smallnest/rpcx/serverplugin"
-	"gopkg.in/go-playground/validator.v9"
 	"log"
 	"math"
-	"reflect"
-	"regexp"
 	"sync"
 	"time"
 )
@@ -90,59 +85,6 @@ func CreateRpcClient(servicePath string) client.XClient {
 	option.WriteTimeout = config.Server.WriteTimeout
 	xclient := client.NewXClient(servicePath, client.Failover, client.RoundRobin, *getDiscovery(servicePath), option)
 	return xclient
-}
-
-/**
- * 参数绑定验证
- */
-func ValidParameter(parameter interface{}) error {
-	return ValidParameterWithRegisterFunc(parameter, "", nil)
-}
-
-/**
-* 参数绑定验证，自定义验证函数注册
-*/
-func ValidParameterWithRegisterFunc(parameter interface{}, tag string, fn validator.Func) error {
-	validate := validator.New()
-
-	// regexp
-	s := reflect.TypeOf(parameter).Elem()
-	v := reflect.ValueOf(parameter).Elem()
-	for i := 0; i < s.NumField(); i++ {
-		pattern := s.Field(i).Tag.Get("regexp")
-		if len(pattern) <= 0 {
-			continue
-		}
-		filedName := s.Field(i).Name
-		ok, err := regexp.MatchString(pattern, v.FieldByName(filedName).String())
-		if err != nil || !ok {
-			logging.Warning(err.Error())
-			return errors.New(STATUS_MSG_INVALID_PARAMS)
-		}
-	}
-
-	// register validation func
-	if len(tag) < 0  && fn != nil {
-		validate.RegisterValidation(tag, fn)
-	}
-
-	// validate
-	err := validate.Struct(parameter)
-	if err == nil {
-		return nil
-	}
-	if _, ok := err.(*validator.InvalidValidationError); ok {
-		logging.Warning(err)
-		return errors.New(STATUS_MSG_INVALID_PARAMS)
-	}
-	for _, err := range err.(validator.ValidationErrors) {
-		info := fmt.Sprintf("validate err.Namespace:%s Field:%s StructNamespace:%s StructField:%s Tag:%s ActualTag:%s Kind:%v Type:%v Value:%v Param:%s",
-			err.Namespace(), err.Field(), err.StructNamespace(), err.StructField(), err.Tag(), err.ActualTag(), err.Kind(), err.Type(), err.Value(), err.Param(),
-		)
-		logging.Warning(info)
-		return errors.New(STATUS_MSG_INVALID_PARAMS)
-	}
-	return nil
 }
 
 

@@ -59,7 +59,7 @@ func bindtest(ctx *gin.Context)  {
 }
 
 func GoodsPay(ctx context.Context, parameter *GoodsPayParameter, payMoney *float64) error {
-	err := ValidParameter(parameter)
+	err := ValidateParameter(parameter)
 	if err != nil {
 		return err
 	}

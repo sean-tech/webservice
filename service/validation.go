@@ -37,7 +37,7 @@ const (
 	tag_pattern_pwd2	 	= "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9]{6,18}$"
 	// 密码 - 须包含大小写字母和数字的组合，可以使用特殊字符，长度在 6-18 之间
 	validation_tag_pwd3 	= "pwd3"
-	tag_pattern_pwd3	 	= "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,18}$"
+	tag_pattern_pwd3	 	= "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{6,18}$"
 )
 
 func init() {

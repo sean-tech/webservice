@@ -29,6 +29,9 @@ const (
 	// 账号
 	validation_tag_account 	= "account"
 	tag_pattern_account 	= "^[a-zA-Z][a-zA-Z0-9_]{4,15}$"
+	// md5
+	validation_tag_md5 	= "md5"
+	tag_pattern_md5 	= "^[a-zA-Z0-9]{32}$"
 	// 密码 - 以字母开头，长度在6~18之间，只能包含字母、数字和下划线
 	validation_tag_pwd1 	= "pwd1"
 	tag_pattern_pwd1	 	= "^[a-zA-Z]\\w{5,17}$"
@@ -47,6 +50,7 @@ func init() {
 		validation_tag_idcard 	: tag_pattern_idcard,
 		validation_tag_qq 		: tag_pattern_qq,
 		validation_tag_account 	: tag_pattern_account,
+		validation_tag_md5 	: tag_pattern_md5,
 		validation_tag_pwd1 	: tag_pattern_pwd1,
 		validation_tag_pwd2 	: tag_pattern_pwd2,
 		validation_tag_pwd3 	: tag_pattern_pwd3,

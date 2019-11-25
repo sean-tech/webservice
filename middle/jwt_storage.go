@@ -7,31 +7,37 @@ import (
 	"time"
 )
 
+/** jwt token 存储接口 **/
+type IJwtTokenStorage interface {
+	Store(userId uint64, token string, expiresTime time.Duration)
+	Load(userId uint64) (token string, ok bool)
+	Delete(userId uint64)
+}
 
 var (
-	memeoryTokenStorageOnce sync.Once
-	memeoryTokenStorage IJwtTokenStorage
-	redisTokenStorageOnce sync.Once
-	redisTokenStorage IJwtTokenStorage
+	_memeoryTokenStorageOnce sync.Once
+	_memeoryTokenStorage     IJwtTokenStorage
+	_redisTokenStorageOnce   sync.Once
+	_redisTokenStorage       IJwtTokenStorage
 )
 /**
  * 获取jwt token 内存存储实例
  */
 func GetMemeoryTokenStorage() IJwtTokenStorage {
-	memeoryTokenStorageOnce.Do(func() {
-		memeoryTokenStorage = new(JwtMemeoryTokenStorage)
+	_memeoryTokenStorageOnce.Do(func() {
+		_memeoryTokenStorage = new(JwtMemeoryTokenStorage)
 	})
-	return memeoryTokenStorage
+	return _memeoryTokenStorage
 }
 
 /**
  * 获取jwt token Redis存储实例
  */
 func GetRedisTokenStorage() IJwtTokenStorage {
-	redisTokenStorageOnce.Do(func() {
-		redisTokenStorage = new(JwtRedisTokenStorage)
+	_redisTokenStorageOnce.Do(func() {
+		_redisTokenStorage = new(JwtRedisTokenStorage)
 	})
-	return redisTokenStorage
+	return _redisTokenStorage
 }
 
 
@@ -66,14 +72,14 @@ func (this *JwtMemeoryTokenStorage) Delete(userId uint64) {
 type JwtRedisTokenStorage struct {}
 
 func (this *JwtRedisTokenStorage) Store(userId uint64, token string, expiresTime time.Duration) {
-	err := database.GetRedisManager().Set(string(userId), token, expiresTime)
+	err := database.GetGlobalRedis().Set(string(userId), token, expiresTime)
 	if err != nil {
 		logging.Error(err)
 	}
 }
 
 func (this *JwtRedisTokenStorage) Load(userId uint64) (token string, ok bool) {
-	tokenPointer, err := database.GetRedisManager().Get(string(userId))
+	tokenPointer, err := database.GetGlobalRedis().Get(string(userId))
 	if err != nil {
 		logging.Error(err)
 		return "", false
@@ -82,5 +88,5 @@ func (this *JwtRedisTokenStorage) Load(userId uint64) (token string, ok bool) {
 }
 
 func (this *JwtRedisTokenStorage) Delete(userId uint64) {
-	database.GetRedisManager().Delete(string(userId))
+	database.GetGlobalRedis().Delete(string(userId))
 }

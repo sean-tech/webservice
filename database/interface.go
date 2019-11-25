@@ -24,8 +24,10 @@ type IRedisManager interface {
 var (
 	mysqlManagerOnce sync.Once
 	redisManagerOnce sync.Once
+	golablRedisManagerOnce sync.Once
 	mysqlManager IMysqlManager
 	redisManager IRedisManager
+	golablRedisManager IRedisManager
 )
 
 func GetMysqlManager() IMysqlManager {
@@ -37,8 +39,14 @@ func GetMysqlManager() IMysqlManager {
 
 func GetRedisManager() IRedisManager {
 	redisManagerOnce.Do(func() {
-		redisManager = new(redisManagerImpl)
+		redisManager = newRedisManagerImpl(_redis_link_model)
 	})
 	return redisManager
 }
 
+func GetGlobalRedis() IRedisManager {
+	golablRedisManagerOnce.Do(func() {
+		golablRedisManager = newRedisManagerImpl(_redis_link_global)
+	})
+	return golablRedisManager
+}

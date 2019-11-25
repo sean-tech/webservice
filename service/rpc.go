@@ -40,8 +40,8 @@ func RpcServerServe(registerFunc RpcRegisterFunc) {
 func RegisterPluginEtcd(s *server.Server, serviceAddr string)  {
 	plugin := &serverplugin.EtcdRegisterPlugin{
 		ServiceAddress: "tcp@" + serviceAddr,
-		EtcdServers:    config.Etcd.EndPoints,
-		BasePath:       config.Etcd.BasePath,
+		EtcdServers:    config.Global.EtcdEndPoints,
+		BasePath:       config.Global.EtcdRpcBasePath,
 		Metrics:        metrics.NewRegistry(),
 		Services:       nil,
 		UpdateInterval: time.Minute,
@@ -69,7 +69,7 @@ func getDiscovery(servicePath string) *client.ServiceDiscovery {
 	if discovery, ok := discoveryMap.Load(servicePath); ok {
 		return discovery.(*client.ServiceDiscovery)
 	}
-	discovery := client.NewEtcdDiscovery(config.Etcd.BasePath, servicePath, config.Etcd.EndPoints, nil)
+	discovery := client.NewEtcdDiscovery(config.Global.EtcdRpcBasePath, servicePath, config.Global.EtcdEndPoints, nil)
 	discoveryMap.Store(servicePath, &discovery)
 	return &discovery
 }
@@ -101,6 +101,7 @@ type ServiceInfo struct {
 	UserName string 		`json:"userName"`
 	Password string 		`json:"password"`
 	IsAdministrotor bool 	`json:"isAdministrotor"`
+	Params []byte			`json:"params"`
 }
 
 /**

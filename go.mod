@@ -3,6 +3,7 @@ module github.com/sean-tech/webservice
 go 1.12
 
 require (
+	github.com/coreos/etcd v3.3.13+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.4.0
 	github.com/go-ini/ini v1.48.0

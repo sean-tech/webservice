@@ -19,13 +19,6 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-/** jwt token 存储接口 **/
-type IJwtTokenStorage interface {
-	Store(userId uint64, token string, expiresTime time.Duration)
-	Load(userId uint64) (token string, ok bool)
-	Delete(userId uint64)
-}
-
 type IJwtManager interface {
 	SetJwtTokenStorage(tokenStorage IJwtTokenStorage)
 	GenerateToken(userId uint64, userName, password string, isAdministrotor bool) (string, error)
@@ -42,8 +35,7 @@ var (
  */
 func GetJwtManager() IJwtManager {
 	jwtManagerOnce.Do(func() {
-		jwtManager = new(jwtManagerImpl)
-		jwtManager.SetJwtTokenStorage(GetRedisTokenStorage())
+		jwtManager = NewJwtManagerImpl()
 	})
 	return jwtManager
 }
@@ -55,6 +47,14 @@ func GetJwtManager() IJwtManager {
  */
 type jwtManagerImpl struct{
 	tokenStorage IJwtTokenStorage
+	publisher *Publisher
+}
+
+func NewJwtManagerImpl() *jwtManagerImpl {
+	return &jwtManagerImpl{
+		tokenStorage: GetRedisTokenStorage(),
+		publisher:    NewPublisher("token", 10*time.Second, 1000),
+	}
 }
 
 /**
@@ -74,7 +74,7 @@ func (this *jwtManagerImpl) SetJwtTokenStorage(tokenStorage IJwtTokenStorage) {
  * 生成token
  */
 func (this *jwtManagerImpl) GenerateToken(userId uint64, userName, password string, isAdministrotor bool) (string, error) {
-	expireTime := time.Now().Add(config.App.JwtExpiresTime)
+	expireTime := time.Now().Add(config.Global.JwtExpiresTime)
 	c := Claims{
 		UserId:			userId,
 		UserName:       userName,
@@ -82,13 +82,14 @@ func (this *jwtManagerImpl) GenerateToken(userId uint64, userName, password stri
 		IsAdministrotor:isAdministrotor,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(),
-			Issuer:    config.App.JwtIssuer,
+			Issuer:    config.Global.JwtIssuer,
 		},
 	}
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
-	token, err := tokenClaims.SignedString([]byte(config.App.JwtSecret))
+	token, err := tokenClaims.SignedString([]byte(config.Global.JwtSecret))
 	if err == nil {
-		this.tokenStorage.Store(userId, token, config.App.JwtExpiresTime)
+		this.tokenStorage.Store(userId, token, config.Global.JwtExpiresTime)
+		this.publisher.Publish(map[string]interface{}{"userId":userId, "token":token, "expires":config.Global.JwtExpiresTime})
 	}
 	return token, err
 }
@@ -98,7 +99,7 @@ func (this *jwtManagerImpl) GenerateToken(userId uint64, userName, password stri
  */
 func (this *jwtManagerImpl) ParseToken(token string) (*Claims, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.App.JwtSecret), nil
+		return []byte(config.Global.JwtSecret), nil
 	})
 	if err != nil {
 		return nil, err
@@ -113,7 +114,7 @@ func (this *jwtManagerImpl) ParseToken(token string) (*Claims, error) {
 	if !ok {
 		return nil, errors.New("token parse failed")
 	}
-	if claims.Issuer != config.App.JwtIssuer {
+	if claims.Issuer != config.Global.JwtIssuer {
 		return nil, errors.New("token parsed issuer not right")
 	}
 	return claims, nil

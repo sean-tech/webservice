@@ -1,13 +1,13 @@
-package fileutils
+package service
 
 import (
 	"fmt"
+	"github.com/sean-tech/webservice/config"
+	"github.com/sean-tech/webservice/fileutils"
 	"log"
 	"mime/multipart"
 	"os"
 	"path"
-	"github.com/sean-tech/webservice/config"
-	"github.com/sean-tech/webservice/encrypt"
 	"strings"
 )
 
@@ -18,7 +18,7 @@ func GetUploadFileFullUrl(name string) string {
 func GetUploadFileName(name string) string {
 	ext := path.Ext(name)
 	fileName := strings.TrimSuffix(name, ext)
-	fileName = encrypt.GetMd5Instance().EncryptWithTimestamp(fileName)
+	//fileName = encrypt.GetMd5().EncryptWithTimestamp([]byte(fileName), 0)
 	return fileName + ext
 }
 
@@ -31,7 +31,7 @@ func GetUploadFileFullPath() string {
 }
 
 func CheckUploadFileExt(fileName string) bool {
-	ext := GetExt(fileName)
+	ext := fileutils.GetExt(fileName)
 	for _, allowExt := range config.Upload.FileAllowExts {
 		if strings.ToUpper(allowExt) == strings.ToUpper(ext) {
 			return true
@@ -41,7 +41,7 @@ func CheckUploadFileExt(fileName string) bool {
 }
 
 func CheckUploadFileSize(f multipart.File) bool {
-	size, err := GetSize(f)
+	size, err := fileutils.GetSize(f)
 	if err != nil {
 		log.Println(err)
 		return false
@@ -56,12 +56,12 @@ func CheckUploadFile(src string) error {
 		return fmt.Errorf("os.Getwd err: %v", err)
 	}
 
-	err = MKDirIfNotExist(dir + "/" + src)
+	err = fileutils.MKDirIfNotExist(dir + "/" + src)
 	if err != nil {
 		return fmt.Errorf("file.IsNotExistMkDir err: %v", err)
 	}
 
-	perm := CheckPermission(src)
+	perm := fileutils.CheckPermission(src)
 	if perm == true {
 		return fmt.Errorf("file.CheckPermission Permission denied src: %s", src)
 	}

@@ -37,7 +37,7 @@ var (
 
 func Setup() {
 
-	if config.App.RunMode == "debug" {
+	if config.Global.RunMode == "debug" {
 		debugLogger = initLogger(level_debug)
 	}
 	infoLogger = initLogger(level_info)
@@ -47,7 +47,7 @@ func Setup() {
 }
 
 func Debug(v ...interface{})  {
-	if config.App.RunMode == "debug" {
+	if config.Global.RunMode == "debug" {
 		debugLogger.Print(v)
 		fmt.Println(v)
 	}
@@ -96,7 +96,7 @@ func logFileSliceTiming()  {
 	c := cron.New()
 	spec := "0 0 0 * * *"
 	err := c.AddFunc(spec, func() {
-		if config.App.RunMode == "debug" && fileTimePassDaySlice(levelFlags[level_debug]) {
+		if config.Global.RunMode == "debug" && fileTimePassDaySlice(levelFlags[level_debug]) {
 			debugLogger = initLogger(level_debug)
 		}
 		if fileTimePassDaySlice(levelFlags[level_info]) {

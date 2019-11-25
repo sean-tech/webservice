@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sean-tech/webservice/config"
@@ -15,13 +14,14 @@ import (
 )
 
 func TestGinServer(t *testing.T) {
-	default_file_path := "../web_config.ini"
-	usage := "please use -cfp to pointing at config file path for webservice"
-	config_file_path := flag.String("cfp", default_file_path, usage)
-	flag.Parse()
-
+	//default_file_path := "../web_config.ini"
 	// config & logging
-	config.Setup(*config_file_path)
+	//config.SetupFromLocal(default_file_path)
+	var (
+		path = "sean.tech/webservice/config"
+		endpoints = "localhost:2379"
+	)
+	config.Setup(path, endpoints)
 	logging.Setup()
 	// server start
 	HttpServerServe(ginApiRegister)
@@ -35,6 +35,8 @@ func ginApiRegister(engine *gin.Engine) {
 }
 
 func bindtest(ctx *gin.Context)  {
+	date := ctx.Request.Header.Get("Date")
+	fmt.Println(date)
 	g := Gin{
 		Ctx: ctx,
 	}

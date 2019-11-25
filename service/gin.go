@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sean-tech/webservice/config"
-	"github.com/sean-tech/webservice/fileutils"
 	"github.com/sean-tech/webservice/logging"
 	"io"
 	"log"
@@ -24,14 +23,14 @@ type GinRegisterFunc func(engine *gin.Engine)
  */
 func HttpServerServe(registerFunc GinRegisterFunc) {
 	// gin
-	gin.SetMode(config.App.RunMode)
+	gin.SetMode(config.Global.RunMode)
 	gin.DisableConsoleColor()
 	logging.GinWriterGet(func(writer io.Writer) {
 		gin.DefaultWriter = io.MultiWriter(writer, os.Stdout)
 		logging.Debug(writer)
 	})
 	engine := gin.Default()
-	engine.StaticFS(config.Upload.FileSavePath, http.Dir(fileutils.GetUploadFilePath()))
+	engine.StaticFS(config.Upload.FileSavePath, http.Dir(GetUploadFilePath()))
 	registerFunc(engine)
 	// server
 	s := http.Server{
@@ -100,6 +99,7 @@ const (
 	KEY_CTX_USERNAME 			= "KEY_CTX_USERNAME"
 	KEY_CTX_PASSWORD 			= "KEY_CTX_PASSWORD"
 	KEY_CTX_IS_ADMINISTROTOR 	= "KEY_CTX_IS_ADMINISTROTOR"
+	KEY_CTX_PARAMS_JSON 		= "KEY_CTX_PARAMS_JSON"
 )
 /**
  * 对ServiceInfo赋值
@@ -122,6 +122,10 @@ func (g *Gin) BindServiceInfo(serviceCtx context.Context)  {
 	if exist {
 		serviceInfo.IsAdministrotor = isAdministrotor.(bool)
 	}
+	paramJsonBytes, exist := g.Ctx.Get(KEY_CTX_PARAMS_JSON)
+	if exist {
+		serviceInfo.Params = paramJsonBytes.([]byte)
+	}
 }
 
 /**
@@ -142,15 +146,15 @@ func (g *Gin) UploadFile() (fileUrl, filePath string, ok bool) {
 		return "", "", false
 	}
 
-	fileName := fileutils.GetUploadFileName(fileHeader.Filename)
-	fullPath := fileutils.GetUploadFileFullPath()
-	savePath := fileutils.GetUploadFilePath()
+	fileName := GetUploadFileName(fileHeader.Filename)
+	fullPath := GetUploadFileFullPath()
+	savePath := GetUploadFilePath()
 	src := fullPath + fileName
-	if !fileutils.CheckUploadFileExt(src) || !fileutils.CheckUploadFileSize(file) {
+	if !CheckUploadFileExt(src) || !CheckUploadFileSize(file) {
 		g.ResponseCode(STATUS_CODE_UPLOAD_FILE_CHECK_FORMAT_WRONG, nil)
 		return "", "", false
 	}
-	if err := fileutils.CheckUploadFile(fullPath); err != nil {
+	if err := CheckUploadFile(fullPath); err != nil {
 		logging.Warning(err)
 		g.ResponseCode(STATUS_CODE_UPLOAD_FILE_CHECK_FAILED, nil)
 		return "", "", false
@@ -160,7 +164,7 @@ func (g *Gin) UploadFile() (fileUrl, filePath string, ok bool) {
 		g.ResponseCode(STATUS_CODE_UPLOAD_FILE_SAVE_FAILED, nil)
 		return "", "", false
 	}
-	fileUrl = fileutils.GetUploadFileFullUrl(fileName)
+	fileUrl = GetUploadFileFullUrl(fileName)
 	filePath = savePath + fileName
 	return fileUrl, filePath, true
 }

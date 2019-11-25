@@ -8,7 +8,7 @@ import (
 type ipUtil int
 var Ip = new(ipUtil)
 
-func (this *ipUtil) GetLocalIP() (ips []string, err error){
+func (this *ipUtil) GetLocalIP() (ips []string){
 	addrs,err := net.InterfaceAddrs()
 	if err != nil{
 		fmt.Println("get ip arr failed: ",err)

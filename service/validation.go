@@ -3,8 +3,8 @@ package service
 import (
 	"errors"
 	"fmt"
-	"github.com/sean-tech/webservice/logging"
 	"gopkg.in/go-playground/validator.v9"
+	"log"
 	"reflect"
 	"regexp"
 	"sync"
@@ -84,7 +84,7 @@ func ValidateParameter(parameter interface{}) error {
 			return ok
 		})
 		if err != nil {
-			logging.Warning(err)
+			log.Println(err)
 		}
 		return true
 	})
@@ -95,14 +95,14 @@ func ValidateParameter(parameter interface{}) error {
 		return nil
 	}
 	if _, ok := err.(*validator.InvalidValidationError); ok {
-		logging.Warning(err)
+		log.Println(err)
 		return errors.New(STATUS_MSG_INVALID_PARAMS)
 	}
 	for _, err := range err.(validator.ValidationErrors) {
 		info := fmt.Sprintf("validate err.Namespace:%s Field:%s StructNamespace:%s StructField:%s Tag:%s ActualTag:%s Kind:%v Type:%v Value:%v Param:%s",
 			err.Namespace(), err.Field(), err.StructNamespace(), err.StructField(), err.Tag(), err.ActualTag(), err.Kind(), err.Type(), err.Value(), err.Param(),
 		)
-		logging.Warning(info)
+		log.Println(info)
 		return errors.New(STATUS_MSG_INVALID_PARAMS)
 	}
 	return nil
@@ -123,7 +123,7 @@ func ValidateRegexpTagParameter(parameter interface{}) error {
 		filedName := s.Field(i).Name
 		ok, err := regexp.MatchString(pattern, v.FieldByName(filedName).String())
 		if err != nil || !ok {
-			logging.Warning(err.Error())
+			log.Println(err)
 			return errors.New(STATUS_MSG_INVALID_PARAMS)
 		}
 	}

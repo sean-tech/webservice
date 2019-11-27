@@ -67,6 +67,14 @@ type Gin struct {
 }
 
 /**
+ * 响应数据，成功
+ */
+func (g *Gin) ResponseData(data interface{}) {
+	g.ResponseCode(STATUS_CODE_SUCCESS, data)
+	return
+}
+
+/**
  * 响应数据，根据code默认msg
  */
 func (g *Gin) ResponseCode(statusCode StatusCode, data interface{}) {
@@ -87,10 +95,15 @@ func (g *Gin) ResponseMsg(statusCode StatusCode, msg string, data interface{}) {
 }
 
 /**
- * 响应数据，自定义msg
+ * 响应数据，自定义error
  */
-func (g *Gin) ResponseError(err data.Error) {
-	g.ResponseCode(StatusCode(err.Code), nil)
+func (g *Gin) ResponseError(err error) {
+	if e, ok := err.(*data.Error); ok {
+		g.ResponseCode(StatusCode(e.Code), nil)
+		return
+	}
+	g.ResponseMsg(STATUS_CODE_FAILED, err.Error(), nil)
+
 	return
 }
 

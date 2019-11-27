@@ -1,6 +1,8 @@
 package data
 
-import "time"
+import (
+	"time"
+)
 
 type BaseParameter int32
 type BaseResp int32
@@ -12,3 +14,18 @@ type BaseModel struct {
 	TbStatus string			`db:"tb_status" json:"-"`
 }
 
+type Error struct {
+	Code int
+	Msg string
+}
+
+func (this *Error) Error() string {
+	return this.Msg
+}
+
+func NewError(code int, msg string) *Error {
+	return &Error{
+		Code: code,
+		Msg:  msg,
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sean-tech/webservice/config"
+	"github.com/sean-tech/webservice/data"
 	"github.com/sean-tech/webservice/logging"
 	"io"
 	"log"
@@ -66,7 +67,7 @@ type Gin struct {
 /**
  * 响应数据，根据code默认msg
  */
-func (g *Gin) ResponseCode(statusCode StatusCode, data interface{})  {
+func (g *Gin) ResponseCode(statusCode StatusCode, data interface{}) {
 	g.ResponseMsg(statusCode, statusCode.Msg(), data)
 	return
 }
@@ -74,12 +75,20 @@ func (g *Gin) ResponseCode(statusCode StatusCode, data interface{})  {
 /**
  * 响应数据，自定义msg
  */
-func (g *Gin) ResponseMsg(statusCode StatusCode, msg string, data interface{})  {
+func (g *Gin) ResponseMsg(statusCode StatusCode, msg string, data interface{}) {
 	g.Ctx.JSON(http.StatusOK, gin.H{
 		"code" : statusCode,
 		"msg" :  msg,
 		"data" : data,
 	})
+	return
+}
+
+/**
+ * 响应数据，自定义msg
+ */
+func (g *Gin) ResponseError(err data.Error) {
+	g.ResponseCode(StatusCode(err.Code), nil)
 	return
 }
 

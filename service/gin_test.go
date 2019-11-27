@@ -47,7 +47,7 @@ func bindtest(ctx *gin.Context)  {
 		g.ResponseMsg(STATUS_CODE_INVALID_PARAMS, err.Error(), nil)
 		return
 	}
-	var serviceCtx = NewServiceInfoContext(context.Background())
+	var serviceCtx = newServiceInfoContext(context.Background())
 	var payMoney float64 = 0
 	err = GoodsPay(serviceCtx, &parameter, &payMoney)
 	if err != nil {

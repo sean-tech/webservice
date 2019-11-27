@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sean-tech/webservice/config"
@@ -92,16 +94,7 @@ func (g *Gin) ResponseError(err data.Error) {
 	return
 }
 
-/**
- * 参数绑定
- */
-func (g *Gin) BindParameter(parameter interface{}) error {
-	err := g.Ctx.Bind(parameter)
-	if err != nil {
-		return err
-	}
-	return nil
-}
+
 
 const (
 	KEY_CTX_USERID 				= "KEY_CTX_USERID"
@@ -110,11 +103,32 @@ const (
 	KEY_CTX_IS_ADMINISTROTOR 	= "KEY_CTX_IS_ADMINISTROTOR"
 	KEY_CTX_PARAMS_JSON 		= "KEY_CTX_PARAMS_JSON"
 )
+
+/**
+ * 参数绑定
+ */
+func (g *Gin) BindParameter(parameter interface{}) error {
+	//err := g.Ctx.Bind(parameter)
+	//if err != nil {
+	//	return err
+	//}
+	//return nil
+	paramJsonBytes, exist := g.Ctx.Get(KEY_CTX_PARAMS_JSON)
+	if !exist {
+		return errors.New(STATUS_MSG_INVALID_PARAMS)
+	}
+	if err := json.Unmarshal(paramJsonBytes.([]byte), parameter); err != nil {
+		return err
+	}
+	return nil
+}
+
 /**
  * 对ServiceInfo赋值
  */
-func (g *Gin) BindServiceInfo(serviceCtx context.Context)  {
-	serviceInfo := GetServiceInfo(serviceCtx)
+func (g *Gin) NewServiceInfoContext(parentCtx context.Context) context.Context {
+	ctx := newServiceInfoContext(parentCtx)
+	serviceInfo := GetServiceInfo(ctx)
 	userId, exist := g.Ctx.Get(KEY_CTX_USERID)
 	if exist {
 		serviceInfo.UserId = userId.(uint64)
@@ -131,10 +145,7 @@ func (g *Gin) BindServiceInfo(serviceCtx context.Context)  {
 	if exist {
 		serviceInfo.IsAdministrotor = isAdministrotor.(bool)
 	}
-	paramJsonBytes, exist := g.Ctx.Get(KEY_CTX_PARAMS_JSON)
-	if exist {
-		serviceInfo.Params = paramJsonBytes.([]byte)
-	}
+	return ctx
 }
 
 /**

@@ -101,13 +101,12 @@ type ServiceInfo struct {
 	UserName string 		`json:"userName"`
 	Password string 		`json:"password"`
 	IsAdministrotor bool 	`json:"isAdministrotor"`
-	Params []byte			`json:"params"`
 }
 
 /**
  * 新建context，并初始化info，绑定serviceId
  */
-func NewServiceInfoContext(parentCtx context.Context) context.Context {
+func newServiceInfoContext(parentCtx context.Context) context.Context {
 	id, _ := GenerateId(config.App.WorkerId)
 	info := &ServiceInfo{
 		ServiceId:    uint64(id),

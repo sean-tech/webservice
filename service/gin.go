@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sean-tech/webservice/config"
@@ -128,10 +127,10 @@ func (g *Gin) BindParameter(parameter interface{}) error {
 	//return nil
 	paramJsonBytes, exist := g.Ctx.Get(KEY_CTX_PARAMS_JSON)
 	if !exist {
-		return errors.New(STATUS_MSG_INVALID_PARAMS)
+		return data.NewError(STATUS_CODE_INVALID_PARAMS, "参数json获取失败")
 	}
 	if err := json.Unmarshal(paramJsonBytes.([]byte), parameter); err != nil {
-		return err
+		return data.NewError(STATUS_CODE_INVALID_PARAMS, err.Error())
 	}
 	return nil
 }

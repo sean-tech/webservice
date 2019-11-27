@@ -1,8 +1,8 @@
 package service
 
 import (
-	"errors"
 	"fmt"
+	"github.com/sean-tech/webservice/data"
 	"gopkg.in/go-playground/validator.v9"
 	"log"
 	"reflect"
@@ -96,14 +96,12 @@ func ValidateParameter(parameter interface{}) error {
 	}
 	if _, ok := err.(*validator.InvalidValidationError); ok {
 		log.Println(err)
-		return errors.New(STATUS_MSG_INVALID_PARAMS)
+		return data.NewError(STATUS_CODE_INVALID_PARAMS, err.Error())
 	}
 	for _, err := range err.(validator.ValidationErrors) {
-		info := fmt.Sprintf("validate err.Namespace:%s Field:%s StructNamespace:%s StructField:%s Tag:%s ActualTag:%s Kind:%v Type:%v Value:%v Param:%s",
-			err.Namespace(), err.Field(), err.StructNamespace(), err.StructField(), err.Tag(), err.ActualTag(), err.Kind(), err.Type(), err.Value(), err.Param(),
-		)
+		info := fmt.Sprintf("参数%s字段%s校验失败:不符合%s要求", err.Param(), err.Field(), err.Tag())
 		log.Println(info)
-		return errors.New(STATUS_MSG_INVALID_PARAMS)
+		return data.NewError(STATUS_CODE_INVALID_PARAMS, info)
 	}
 	return nil
 }
@@ -124,7 +122,7 @@ func ValidateRegexpTagParameter(parameter interface{}) error {
 		ok, err := regexp.MatchString(pattern, v.FieldByName(filedName).String())
 		if err != nil || !ok {
 			log.Println(err)
-			return errors.New(STATUS_MSG_INVALID_PARAMS)
+			return data.NewError(STATUS_CODE_INVALID_PARAMS, err.Error())
 		}
 	}
 	return nil

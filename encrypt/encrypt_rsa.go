@@ -5,11 +5,10 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha1"
 	"crypto/x509"
-	"encoding/hex"
 	"encoding/pem"
 	"errors"
-	"fmt"
 )
 
 type rsaEncryptImpl struct {}
@@ -30,8 +29,8 @@ func (this *rsaEncryptImpl) Encrypt(publicKey string, data []byte) ([]byte, erro
 	pubKey := pukI.(*rsa.PublicKey)
 
 
-	fmt.Println("load public key successed")
-	fmt.Println(pubKey)
+	//fmt.Println("load public key successed")
+	//fmt.Println(pubKey)
 	//避免数据过长报错，故分段加密
 	partLen := pubKey.N.BitLen() / 8 - 11
 	chunks := split(data, partLen)
@@ -66,8 +65,8 @@ func (this *rsaEncryptImpl) Decrypt(privateKey string, data []byte) ([]byte, err
 	priKey := prkI.(*rsa.PrivateKey)
 
 
-	fmt.Println("load private key successed")
-	fmt.Println(priKey)
+	//fmt.Println("load private key successed")
+	//fmt.Println(priKey)
 
 	partLen := priKey.N.BitLen() / 8
 	chunks := split(data, partLen)
@@ -103,17 +102,20 @@ func (this *rsaEncryptImpl) Sign(privateKey string, data []byte) ([]byte, error)
 	priKey := prkI.(*rsa.PrivateKey)
 
 
-	fmt.Println("load private key successed")
-	fmt.Println(priKey)
+	//fmt.Println("load private key successed")
+	//fmt.Println(priKey)
 
-	hashedStr := GetMd5().Encrypt(data)
+	//hashedStr := GetMd5().Encrypt(data)
+	h := sha1.New()
+	h.Write(data)
+	hashed := h.Sum(nil)
 
-	fmt.Println(string(data))
-	fmt.Println(hashedStr)
+	//fmt.Println(string(data))
+	//fmt.Println(hashedStr)
 
-	hashed,_ := hex.DecodeString(hashedStr)
+	//hashed,_ := hex.DecodeString(hashedStr)
 
-	return rsa.SignPKCS1v15(rand.Reader, priKey, crypto.MD5, hashed)
+	return rsa.SignPKCS1v15(rand.Reader, priKey, crypto.SHA1, hashed)
 }
 
 /**
@@ -134,13 +136,17 @@ func (this *rsaEncryptImpl) Verify(publicKey string, data []byte, signedData []b
 	pubKey := pukI.(*rsa.PublicKey)
 
 
-	fmt.Println("load public key successed")
-	fmt.Println(pubKey)
+	//fmt.Println("load public key successed")
+	//fmt.Println(pubKey)
 
-	hashedStr := GetMd5().Encrypt(data)
-	hashed,_ := hex.DecodeString(hashedStr)
+	h := sha1.New()
+	h.Write(data)
+	hashed := h.Sum(nil)
 
-	return rsa.VerifyPKCS1v15(pubKey, crypto.MD5, hashed, signedData)
+	//hashedStr := GetMd5().Encrypt(data)
+	//hashed,_ := hex.DecodeString(hashedStr)
+
+	return rsa.VerifyPKCS1v15(pubKey, crypto.SHA1, hashed, signedData)
 
 }
 

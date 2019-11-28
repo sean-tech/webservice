@@ -106,12 +106,7 @@ func (this *secretManagerImpl) InterceptRsa() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		//var jsonMap map[string]interface{} = make(map[string]interface{})
-		//json.Unmarshal(jsonBytes, &jsonMap)
-		//var sign = jsonMap["sign"].(string)
 		signDatas, _ := base64.StdEncoding.DecodeString(sign)
-		//delete(jsonMap, "sign")
-		//jsonBytes, _ = json.Marshal(jsonMap)
 		err = encrypt.GetRsa().Verify(config.Global.RsaClientPubKey, jsonBytes, signDatas)
 		if err != nil {
 			g.ResponseCode(service.STATUS_CODE_SECRET_CHECK_FAILED, nil)
@@ -165,6 +160,7 @@ func (this *secretManagerImpl) InterceptAes() gin.HandlerFunc {
 			return
 		}
 		ctx.Set(service.KEY_CTX_PARAMS_JSON, jsonBytes)
+		ctx.Set(service.KEY_CTX_AES_KEY, keyBytes)
 		// next
 		ctx.Next()
 	}

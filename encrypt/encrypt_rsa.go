@@ -27,10 +27,6 @@ func (this *rsaEncryptImpl) Encrypt(publicKey string, data []byte) ([]byte, erro
 		return nil,err
 	}
 	pubKey := pukI.(*rsa.PublicKey)
-
-
-	//fmt.Println("load public key successed")
-	//fmt.Println(pubKey)
 	//避免数据过长报错，故分段加密
 	partLen := pubKey.N.BitLen() / 8 - 11
 	chunks := split(data, partLen)
@@ -63,10 +59,6 @@ func (this *rsaEncryptImpl) Decrypt(privateKey string, data []byte) ([]byte, err
 		return nil,err
 	}
 	priKey := prkI.(*rsa.PrivateKey)
-
-
-	//fmt.Println("load private key successed")
-	//fmt.Println(priKey)
 
 	partLen := priKey.N.BitLen() / 8
 	chunks := split(data, partLen)
@@ -101,19 +93,11 @@ func (this *rsaEncryptImpl) Sign(privateKey string, data []byte) ([]byte, error)
 	}
 	priKey := prkI.(*rsa.PrivateKey)
 
-
-	//fmt.Println("load private key successed")
-	//fmt.Println(priKey)
-
 	//hashedStr := GetMd5().Encrypt(data)
+	//hashed,_ := hex.DecodeString(hashedStr)
 	h := sha1.New()
 	h.Write(data)
 	hashed := h.Sum(nil)
-
-	//fmt.Println(string(data))
-	//fmt.Println(hashedStr)
-
-	//hashed,_ := hex.DecodeString(hashedStr)
 
 	return rsa.SignPKCS1v15(rand.Reader, priKey, crypto.SHA1, hashed)
 }
@@ -134,10 +118,6 @@ func (this *rsaEncryptImpl) Verify(publicKey string, data []byte, signedData []b
 		return err
 	}
 	pubKey := pukI.(*rsa.PublicKey)
-
-
-	//fmt.Println("load public key successed")
-	//fmt.Println(pubKey)
 
 	h := sha1.New()
 	h.Write(data)

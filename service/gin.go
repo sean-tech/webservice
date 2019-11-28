@@ -2,11 +2,13 @@ package service
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sean-tech/webservice/config"
 	"github.com/sean-tech/webservice/data"
+	"github.com/sean-tech/webservice/encrypt"
 	"github.com/sean-tech/webservice/logging"
 	"io"
 	"log"
@@ -66,9 +68,35 @@ type Gin struct {
 }
 
 /**
- * 响应数据，成功
+ * 响应数据，成功，原数据转json返回
  */
 func (g *Gin) ResponseData(data interface{}) {
+	g.ResponseCode(STATUS_CODE_SUCCESS, data)
+	return
+}
+
+/**
+ * 响应数据，成功，aes加密返回
+ */
+func (g *Gin) ResponseAesJsonData(data []byte) {
+	if keyBytes, exist := g.Ctx.Get(KEY_CTX_USERNAME); exist == true {
+		if secretBytes, err := encrypt.GetAes().EncryptCBC(data, keyBytes.([]byte)); err == nil {
+			g.ResponseCode(STATUS_CODE_SUCCESS, base64.StdEncoding.EncodeToString(secretBytes))
+			return
+		}
+	}
+	g.ResponseCode(STATUS_CODE_SUCCESS, data)
+	return
+}
+
+/**
+ * 响应数据，成功，rsa加密返回
+ */
+func (g *Gin) ResponseRsaJsonData(data []byte) {
+	if secretBytes, err := encrypt.GetRsa().Encrypt(config.Global.RsaClientPubKey, data); err == nil {
+		g.ResponseCode(STATUS_CODE_SUCCESS, base64.StdEncoding.EncodeToString(secretBytes))
+		return
+	}
 	g.ResponseCode(STATUS_CODE_SUCCESS, data)
 	return
 }
@@ -114,6 +142,7 @@ const (
 	KEY_CTX_PASSWORD 			= "KEY_CTX_PASSWORD"
 	KEY_CTX_IS_ADMINISTROTOR 	= "KEY_CTX_IS_ADMINISTROTOR"
 	KEY_CTX_PARAMS_JSON 		= "KEY_CTX_PARAMS_JSON"
+	KEY_CTX_AES_KEY 			= "KEY_CTX_AES_KEY"
 )
 
 /**

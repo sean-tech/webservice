@@ -3,7 +3,6 @@ package middle
 import (
 	"encoding/base64"
 	"encoding/hex"
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/sean-tech/webservice/config"
 	"github.com/sean-tech/webservice/encrypt"
@@ -86,6 +85,7 @@ func (this *secretManagerImpl) InterceptRsa() gin.HandlerFunc {
 	handler := func(ctx *gin.Context) {
 		g := service.Gin{ctx}
 
+		var sign = ctx.GetHeader("sign")
 		var params SecretParams
 		err := g.Ctx.Bind(&params)
 		if err != nil {
@@ -106,12 +106,12 @@ func (this *secretManagerImpl) InterceptRsa() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		var jsonMap map[string]interface{} = make(map[string]interface{})
-		json.Unmarshal(jsonBytes, &jsonMap)
-		var sign = jsonMap["sign"].(string)
+		//var jsonMap map[string]interface{} = make(map[string]interface{})
+		//json.Unmarshal(jsonBytes, &jsonMap)
+		//var sign = jsonMap["sign"].(string)
 		signDatas, _ := base64.StdEncoding.DecodeString(sign)
-		delete(jsonMap, "sign")
-		jsonBytes, _ = json.Marshal(jsonMap)
+		//delete(jsonMap, "sign")
+		//jsonBytes, _ = json.Marshal(jsonMap)
 		err = encrypt.GetRsa().Verify(config.Global.RsaClientPubKey, jsonBytes, signDatas)
 		if err != nil {
 			g.ResponseCode(service.STATUS_CODE_SECRET_CHECK_FAILED, nil)

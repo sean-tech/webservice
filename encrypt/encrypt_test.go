@@ -74,7 +74,7 @@ func TestRsaEncryptImpl_Verify(t *testing.T) {
 	fmt.Println(string(buf))
 
 	src := "this is a test word for rsa sign"
-	signStr := "KuxIs8BOfmAtHdH0nwE/269WwrDHaX/4sZ4eJUAyTx7+p5CH3w5CVxEbPdLztPKTvIn499Kzg+3q3WHS38oGUzjNVQdE942VxvnEtsOBABlRJlZl4RPIdiLKO6Z8qww1tKd427GHQrYombOLF7jXRmpG9CwD4to27oFWFi0Z1bA="
+	signStr := "Sdg95tT3TRYZu21wwm6rPup3dnh4eGz77iK9ikG9lLuWp1Obbi4L5SEnRuE/aqC23b1lNVDheOTHQuTZhTkoY5NzWSvOv05h3+MmXYHgNO+329X16K/vAl5RagEGV6P9dNrJH1yjX95MzNfXTguG9ZCRDC6kthYrzLk+3Z7mr5w="
 	signData, err := base64.StdEncoding.DecodeString(signStr)
 	if err != nil {
 		t.Error(err)
@@ -124,4 +124,27 @@ func TestAesEncryptImpl_EncryptCBC(t *testing.T) {
 	//decrypted = AesDecryptCFB(encrypted, key)
 	//log.Println("解密结果：", string(decrypted))
 
+}
+
+func TestRsaEncryptImpl_Verify2(t *testing.T) {
+
+	buf, err := fileutils.ReadFile("/Users/lyra/Desktop/Doc/安全方案/businessC/cpubkey.pem")
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println(string(buf))
+
+	str := "haha"
+	src := []byte(str)
+	signStr := "vVl0WXegq4xfpAiDFIMLulhfc2lxaiewSdZ9gJbJGYqPYqmvQkzxJXbSrWxtd+YRjjrGe2+KShENYDP74vgplbnF/fDdG2XnSdQW/VltlRTQu2Z5VOzYlJgDBIbuynYlGIk3Qnc74TLmoi2qd/fWPvFAMHtaccR6EgUvjeeuO54="
+	signData, err := base64.StdEncoding.DecodeString(signStr)
+	if err != nil {
+		t.Error(err)
+	}
+	err = GetRsa().Verify(string(buf), src, signData)
+	if err != nil {
+		t.Error(err)
+	} else {
+		log.Println("verify success")
+	}
 }

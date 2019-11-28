@@ -75,14 +75,26 @@ func (this *secretManagerImpl) GetAesKey(userId uint64) string {
 	return key
 }
 
+type SecretParams struct {
+	Secret string	`json:"secret" validate:"required,base64"`
+} 
+
 /**
  * rsa拦截校验
  */
 func (this *secretManagerImpl) InterceptRsa() gin.HandlerFunc {
 	handler := func(ctx *gin.Context) {
 		g := service.Gin{ctx}
-		secretStr := ctx.Param("secret")
-		encrypted, err := base64.StdEncoding.DecodeString(secretStr)
+
+		var params SecretParams
+		err := g.Ctx.Bind(&params)
+		if err != nil {
+			g.ResponseCode(service.STATUS_CODE_SECRET_CHECK_FAILED, nil)
+			ctx.Abort()
+			return
+		}
+
+		encrypted, err := base64.StdEncoding.DecodeString(params.Secret)
 		if err != nil {
 			g.ResponseCode(service.STATUS_CODE_SECRET_CHECK_FAILED, nil)
 			ctx.Abort()
@@ -120,14 +132,21 @@ func (this *secretManagerImpl) InterceptAes() gin.HandlerFunc {
 	handler := func(ctx *gin.Context) {
 		g := service.Gin{ctx}
 
+		var params SecretParams
+		err := g.Ctx.Bind(&params)
+		if err != nil {
+			g.ResponseCode(service.STATUS_CODE_SECRET_CHECK_FAILED, nil)
+			ctx.Abort()
+			return
+		}
+
 		userId := ctx.GetInt64(service.KEY_CTX_USERID)
 		key, ok := this.aesKeyStorage.Load(uint64(userId))
 		if !ok {
 			g.ResponseCode(service.STATUS_CODE_SECRET_CHECK_FAILED, nil)
 			ctx.Abort()
 		}
-		secretStr := ctx.Param("secret")
-		encrypted, err := base64.StdEncoding.DecodeString(secretStr)
+		encrypted, err := base64.StdEncoding.DecodeString(params.Secret)
 		if err != nil {
 			g.ResponseCode(service.STATUS_CODE_SECRET_CHECK_FAILED, nil)
 			ctx.Abort()

@@ -94,8 +94,15 @@ func (g *Gin) ResponseAesJsonData(data []byte) {
  */
 func (g *Gin) ResponseRsaJsonData(data []byte) {
 	if secretBytes, err := encrypt.GetRsa().Encrypt(config.Global.RsaClientPubKey, data); err == nil {
-		g.ResponseCode(STATUS_CODE_SUCCESS, base64.StdEncoding.EncodeToString(secretBytes))
-		return
+		if signBytes, err :=encrypt.GetRsa().Sign(config.Global.RsaServerPriKey, data); err == nil {
+			g.Ctx.JSON(http.StatusOK, gin.H{
+				"code" : STATUS_CODE_SUCCESS,
+				"msg" :  STATUS_MSG_SUCCESS,
+				"data" : base64.StdEncoding.EncodeToString(secretBytes),
+				"sign" : base64.StdEncoding.EncodeToString(signBytes),
+			})
+			return
+		}
 	}
 	g.ResponseCode(STATUS_CODE_SUCCESS, data)
 	return

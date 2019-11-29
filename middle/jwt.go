@@ -153,10 +153,16 @@ func (this *jwtManagerImpl) InterceptCheck() gin.HandlerFunc {
 			return
 		}
 		// transfer
-		ctx.Set(service.KEY_CTX_USERID, claims.UserId)
-		ctx.Set(service.KEY_CTX_USERNAME, claims.UserName)
-		ctx.Set(service.KEY_CTX_PASSWORD, claims.Password)
-		ctx.Set(service.KEY_CTX_IS_ADMINISTROTOR, claims.IsAdministrotor)
+		id, _ := service.GenerateId(config.App.WorkerId)
+		requisition := &service.Requisition{
+			ServiceId:    	uint64(id),
+			ServicePaths:	make([]string, 5),
+			UserId:       	claims.UserId,
+			UserName:     	claims.UserName,
+			Password:     	claims.Password,
+			IsAdministrotor:claims.IsAdministrotor,
+		}
+		ctx.Set(service.KEY_CTX_REQUISITION, requisition)
 		// next
 		ctx.Next()
 	}

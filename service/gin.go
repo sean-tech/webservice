@@ -79,7 +79,7 @@ func (g *Gin) ResponseData(data interface{}) {
  * 响应数据，成功，aes加密返回
  */
 func (g *Gin) ResponseAesJsonData(data []byte) {
-	if keyBytes, exist := g.Ctx.Get(KEY_CTX_USERNAME); exist == true {
+	if keyBytes, exist := g.Ctx.Get(KEY_CTX_AES_KEY); exist == true {
 		if secretBytes, err := encrypt.GetAes().EncryptCBC(data, keyBytes.([]byte)); err == nil {
 			g.ResponseCode(STATUS_CODE_SUCCESS, base64.StdEncoding.EncodeToString(secretBytes))
 			return
@@ -144,10 +144,7 @@ func (g *Gin) ResponseError(err error) {
 
 
 const (
-	KEY_CTX_USERID 				= "KEY_CTX_USERID"
-	KEY_CTX_USERNAME 			= "KEY_CTX_USERNAME"
-	KEY_CTX_PASSWORD 			= "KEY_CTX_PASSWORD"
-	KEY_CTX_IS_ADMINISTROTOR 	= "KEY_CTX_IS_ADMINISTROTOR"
+	KEY_CTX_REQUISITION 		= "KEY_CTX_REQUISITION"
 	KEY_CTX_PARAMS_JSON 		= "KEY_CTX_PARAMS_JSON"
 	KEY_CTX_AES_KEY 			= "KEY_CTX_AES_KEY"
 )
@@ -172,28 +169,24 @@ func (g *Gin) BindParameter(parameter interface{}) error {
 }
 
 /**
- * 对ServiceInfo赋值
+ * 信息获取，获取传输链上context绑定的用户请求调用信息
  */
-func (g *Gin) NewServiceInfoContext(parentCtx context.Context) context.Context {
-	ctx := newServiceInfoContext(parentCtx)
-	serviceInfo := GetServiceInfo(ctx)
-	userId, exist := g.Ctx.Get(KEY_CTX_USERID)
-	if exist {
-		serviceInfo.UserId = userId.(uint64)
+func (g *Gin) GetRequisition() *Requisition {
+	rq := GetRequisition(g.Ctx)
+	if rq != nil {
+		return rq
 	}
-	userName, exist := g.Ctx.Get(KEY_CTX_USERNAME)
-	if exist {
-		serviceInfo.UserName = userName.(string)
+	id, _ := GenerateId(config.App.WorkerId)
+	rq = &Requisition{
+		ServiceId:    uint64(id),
+		ServicePaths: make([]string, 5),
+		UserId:       0,
+		UserName:     "",
+		Password:     "",
+		IsAdministrotor:false,
 	}
-	password, exist := g.Ctx.Get(KEY_CTX_PASSWORD)
-	if exist {
-		serviceInfo.Password = password.(string)
-	}
-	isAdministrotor, exist := g.Ctx.Get(KEY_CTX_IS_ADMINISTROTOR)
-	if exist {
-		serviceInfo.IsAdministrotor = isAdministrotor.(bool)
-	}
-	return ctx
+	g.Ctx.Set(KEY_CTX_REQUISITION, rq)
+	return rq
 }
 
 /**

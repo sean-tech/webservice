@@ -19,7 +19,7 @@ func init() {
 type ISecretManager interface {
 	SetAesKeyStorage(storage IAesKeyStorage)
 	startSubscribeToken()
-	GetAesKey(userId uint64) string
+	GetAesKey(token string) string
 	InterceptRsa() gin.HandlerFunc
 	InterceptAes() gin.HandlerFunc
 }

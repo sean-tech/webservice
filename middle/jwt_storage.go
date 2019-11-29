@@ -3,6 +3,7 @@ package middle
 import (
 	"github.com/sean-tech/webservice/database"
 	"github.com/sean-tech/webservice/logging"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -72,14 +73,14 @@ func (this *JwtMemeoryTokenStorage) Delete(userId uint64) {
 type JwtRedisTokenStorage struct {}
 
 func (this *JwtRedisTokenStorage) Store(userId uint64, token string, expiresTime time.Duration) {
-	err := database.GetGlobalRedis().Set(string(userId), token, expiresTime)
+	err := database.GetGlobalRedis().Set(strconv.FormatInt(int64(userId), 10), token, expiresTime)
 	if err != nil {
 		logging.Error(err)
 	}
 }
 
 func (this *JwtRedisTokenStorage) Load(userId uint64) (token string, ok bool) {
-	tokenPointer, err := database.GetGlobalRedis().Get(string(userId))
+	tokenPointer, err := database.GetGlobalRedis().Get(strconv.FormatInt(int64(userId), 10))
 	if err != nil {
 		logging.Error(err)
 		return "", false
@@ -88,5 +89,5 @@ func (this *JwtRedisTokenStorage) Load(userId uint64) (token string, ok bool) {
 }
 
 func (this *JwtRedisTokenStorage) Delete(userId uint64) {
-	database.GetGlobalRedis().Delete(string(userId))
+	database.GetGlobalRedis().Delete(strconv.FormatInt(int64(userId), 10))
 }

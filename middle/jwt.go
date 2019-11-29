@@ -89,7 +89,11 @@ func (this *jwtManagerImpl) GenerateToken(userId uint64, userName, password stri
 	token, err := tokenClaims.SignedString([]byte(config.Global.JwtSecret))
 	if err == nil {
 		this.tokenStorage.Store(userId, token, config.Global.JwtExpiresTime)
-		this.publisher.Publish(map[string]interface{}{"userId":userId, "token":token, "expires":config.Global.JwtExpiresTime})
+		originToken, ok := this.tokenStorage.Load(userId)
+		if ok == false {
+			originToken = ""
+		}
+		this.publisher.Publish(map[string]interface{}{"originToken":originToken, "token":token, "expires":config.Global.JwtExpiresTime})
 	}
 	return token, err
 }
@@ -157,6 +161,7 @@ func (this *jwtManagerImpl) InterceptCheck() gin.HandlerFunc {
 		requisition := &service.Requisition{
 			ServiceId:    	uint64(id),
 			ServicePaths:	make([]string, 5),
+			Token:			token,
 			UserId:       	claims.UserId,
 			UserName:     	claims.UserName,
 			Password:     	claims.Password,

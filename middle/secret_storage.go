@@ -9,9 +9,9 @@ import (
 
 /** aes key 存储接口 **/
 type IAesKeyStorage interface {
-	Store(userId uint64,  key string, expiresTime time.Duration)
-	Load(userId uint64) ( key string, ok bool)
-	Delete(userId uint64)
+	Store(token string,  key string, expiresTime time.Duration)
+	Load(token string) ( key string, ok bool)
+	Delete(token string)
 }
 
 var (
@@ -30,15 +30,15 @@ func GetRedisAesKeyStorage() IAesKeyStorage {
 // redis存储实现
 type secretRedisAesKeyStorage struct {}
 
-func (this *secretRedisAesKeyStorage) Store(userId uint64, key string, expiresTime time.Duration) {
-	err := database.GetGlobalRedis().Set(string(userId), key, expiresTime)
+func (this *secretRedisAesKeyStorage) Store(token string, key string, expiresTime time.Duration) {
+	err := database.GetGlobalRedis().Set(token, key, expiresTime)
 	if err != nil {
 		logging.Error(err)
 	}
 }
 
-func (this *secretRedisAesKeyStorage) Load(userId uint64) (key string, ok bool) {
-	keyPointer, err := database.GetGlobalRedis().Get(string(userId))
+func (this *secretRedisAesKeyStorage) Load(token string) (key string, ok bool) {
+	keyPointer, err := database.GetGlobalRedis().Get(token)
 	if err != nil {
 		logging.Error(err)
 		return "", false
@@ -46,6 +46,6 @@ func (this *secretRedisAesKeyStorage) Load(userId uint64) (key string, ok bool) 
 	return *keyPointer, true
 }
 
-func (this *secretRedisAesKeyStorage) Delete(userId uint64) {
-	database.GetGlobalRedis().Delete(string(userId))
+func (this *secretRedisAesKeyStorage) Delete(token string) {
+	database.GetGlobalRedis().Delete(token)
 }

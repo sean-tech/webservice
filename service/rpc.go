@@ -95,6 +95,7 @@ func CreateRpcClient(servicePath string) client.XClient {
 type Requisition struct {
 	ServiceId uint64		`json:"serviceId"`
 	ServicePaths []string  	`json:"servicePath"`
+	Token string			`json:"token"`
 	UserId uint64 			`json:"userId"`
 	UserName string 		`json:"userName"`
 	Password string 		`json:"password"`

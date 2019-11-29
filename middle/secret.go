@@ -56,20 +56,24 @@ func (this *secretManagerImpl) startSubscribeToken() {
 	go func() {
 		for message := range sub.Message {
 			if valMap, ok := message.(map[string]interface{}); ok {
-				userId := valMap["userId"].(int64)
+				originToken := valMap["originToken"].(string)
+				if len(originToken) > 1 {
+					this.aesKeyStorage.Delete(originToken)
+				}
+				token := valMap["token"].(string)
 				expiresTime := valMap["expires"].(time.Duration)
 				keyStr := hex.EncodeToString(encrypt.GetAes().GenerateKey())
-				this.aesKeyStorage.Store(uint64(userId), keyStr, expiresTime)
+				this.aesKeyStorage.Store(token, keyStr, expiresTime)
 			}
 		}
 	}()
 }
 
-func (this *secretManagerImpl) GetAesKey(userId uint64) string {
-	key, ok := this.aesKeyStorage.Load(userId)
+func (this *secretManagerImpl) GetAesKey(token string) string {
+	key, ok := this.aesKeyStorage.Load(token)
 	if !ok {
 		key = hex.EncodeToString(encrypt.GetAes().GenerateKey())
-		this.aesKeyStorage.Store(uint64(userId), key, config.Global.JwtExpiresTime)
+		this.aesKeyStorage.Store(token, key, config.Global.JwtExpiresTime)
 	}
 	return key
 }
@@ -136,7 +140,7 @@ func (this *secretManagerImpl) InterceptAes() gin.HandlerFunc {
 		}
 
 		rq := service.GetRequisition(ctx)
-		key, ok := this.aesKeyStorage.Load(uint64(rq.UserId))
+		key, ok := this.aesKeyStorage.Load(rq.Token)
 		if !ok {
 			g.ResponseCode(service.STATUS_CODE_SECRET_CHECK_FAILED, nil)
 			ctx.Abort()

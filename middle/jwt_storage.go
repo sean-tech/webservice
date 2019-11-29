@@ -80,12 +80,15 @@ func (this *JwtRedisTokenStorage) Store(userId uint64, token string, expiresTime
 }
 
 func (this *JwtRedisTokenStorage) Load(userId uint64) (token string, ok bool) {
-	tokenPointer, err := database.GetGlobalRedis().Get(strconv.FormatInt(int64(userId), 10))
+	token, err := database.GetGlobalRedis().Get(strconv.FormatInt(int64(userId), 10))
 	if err != nil {
 		logging.Error(err)
 		return "", false
 	}
-	return *tokenPointer, true
+	if token == "" {
+		return token,false
+	}
+	return token, true
 }
 
 func (this *JwtRedisTokenStorage) Delete(userId uint64) {

@@ -52,7 +52,7 @@ func (this *secretManagerImpl) SetAesKeyStorage(storage IAesKeyStorage) {
 }
 
 func (this *secretManagerImpl) startSubscribeToken() {
-	sub := SubscribeTopic("token")
+	sub := SubscribeTopic("token", 1000)
 	go func() {
 		for message := range sub.Message {
 			if valMap, ok := message.(map[string]interface{}); ok {

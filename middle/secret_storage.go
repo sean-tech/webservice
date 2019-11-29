@@ -38,12 +38,15 @@ func (this *secretRedisAesKeyStorage) Store(token string, key string, expiresTim
 }
 
 func (this *secretRedisAesKeyStorage) Load(token string) (key string, ok bool) {
-	keyPointer, err := database.GetGlobalRedis().Get(token)
+	key, err := database.GetGlobalRedis().Get(token)
 	if err != nil {
 		logging.Error(err)
 		return "", false
 	}
-	return *keyPointer, true
+	if key == "" {
+		return key,false
+	}
+	return key, true
 }
 
 func (this *secretRedisAesKeyStorage) Delete(token string) {

@@ -15,7 +15,7 @@ type IMysqlManager interface {
 type IRedisManager interface {
 	Open()
 	Set(key string, value interface{}, expiration time.Duration) error
-	Get(key string) (*string, error)
+	Get(key string) (string, error)
 	Delete(key string)
 	TryLock(key string, expiration time.Duration) (result bool)
 	ReleaseLock(key string) (result bool)

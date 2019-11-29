@@ -53,7 +53,7 @@ type jwtManagerImpl struct{
 func NewJwtManagerImpl() *jwtManagerImpl {
 	return &jwtManagerImpl{
 		tokenStorage: GetRedisTokenStorage(),
-		publisher:    NewPublisher("token", 10*time.Second, 1000),
+		publisher:    NewPublisher("token", 10*time.Second),
 	}
 }
 

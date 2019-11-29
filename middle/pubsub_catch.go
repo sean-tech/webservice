@@ -13,6 +13,7 @@ func getCatch() *pubsubCatch {
 		_catch = &pubsubCatch{
 			lock:       sync.RWMutex{},
 			publishers: make(map[string]*Publisher),
+			subscribers:make(map[string][]*Subscriber),
 		}
 	})
 	return _catch
@@ -20,8 +21,9 @@ func getCatch() *pubsubCatch {
 
 
 type pubsubCatch  struct {
-	lock       sync.RWMutex
-	publishers map[string]*Publisher
+	lock       	sync.RWMutex
+	publishers 	map[string]*Publisher
+	subscribers map[string][]*Subscriber //订阅者信息
 }
 
 func (this *pubsubCatch) addPublisher(topic string, publisher *Publisher)  {
@@ -50,18 +52,40 @@ func (this *pubsubCatch) getPublisher(topic string) *Publisher {
 }
 
 func (this *pubsubCatch) addSubscriber(topic string, subscriber *Subscriber)  {
-	if publisher := this.getPublisher(topic); publisher != nil {
-		publisher.lock.Lock()
-		publisher.subscribers = append(publisher.subscribers, subscriber)
-		publisher.lock.Unlock()
+	this.lock.Lock()
+	defer this.lock.Unlock()
+	this.subscribers[topic] = append(this.subscribers[topic], subscriber)
+}
+
+func (this *pubsubCatch) getSubscribers(topic string) []*Subscriber {
+	this.lock.RLock()
+	defer this.lock.RUnlock()
+	subscribers, ok := this.subscribers[topic]
+	if ok {
+		return subscribers
+	}
+	return []*Subscriber{}
+}
+
+func (this *pubsubCatch) deleteAllSubscribers(topic string)  {
+	subscribers := this.getSubscribers(topic)
+	if len(subscribers) > 0 {
+		this.lock.Lock()
+		defer this.lock.Unlock()
+		delete(this.subscribers, topic)
 	}
 }
 
-func (this *pubsubCatch) getSubscriber(topic string) []*Subscriber {
-	if publisher := this.getPublisher(topic); publisher != nil {
-		publisher.lock.RLock()
-		defer publisher.lock.RUnlock()
-		return publisher.subscribers
+func (this *pubsubCatch) deleteSubscriber(subscriber *Subscriber) {
+	subscribers := this.getSubscribers(subscriber.Topic)
+	if len(subscribers) > 0 {
+		i := len(subscribers) - 1
+		for idx, sub := range subscribers {
+			if subscriber == sub {
+				i = idx
+				break
+			}
+		}
+		this.subscribers[subscriber.Topic] =  append(subscribers[:i], subscribers[i+1:]...)
 	}
-	return []*Subscriber{}
 }

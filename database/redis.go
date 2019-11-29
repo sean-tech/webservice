@@ -68,14 +68,14 @@ func (this *redisManagerImpl) Set(key string, value interface{}, expiration time
 /**
  * 取
  */
-func (this *redisManagerImpl) Get(key string) (*string, error) {
+func (this *redisManagerImpl) Get(key string) (string, error) {
 	val, err := this.client.Get(key).Result()
 	if err == redis.Nil {
-		return nil, nil
+		return "", nil
 	} else if err != nil {
-		return nil, err
+		return "", err
 	} else {
-		return &val, nil
+		return val, nil
 	}
 }
 

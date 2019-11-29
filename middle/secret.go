@@ -135,8 +135,8 @@ func (this *secretManagerImpl) InterceptAes() gin.HandlerFunc {
 			return
 		}
 
-		userId := ctx.GetInt64(service.KEY_CTX_USERID)
-		key, ok := this.aesKeyStorage.Load(uint64(userId))
+		rq := service.GetRequisition(ctx)
+		key, ok := this.aesKeyStorage.Load(uint64(rq.UserId))
 		if !ok {
 			g.ResponseCode(service.STATUS_CODE_SECRET_CHECK_FAILED, nil)
 			ctx.Abort()

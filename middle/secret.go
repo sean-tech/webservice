@@ -91,9 +91,13 @@ func (this *secretManagerImpl) InterceptRsa() gin.HandlerFunc {
 
 		var sign = ctx.GetHeader("sign")
 		var params SecretParams
-		err := g.Ctx.Bind(&params)
-		if err != nil {
+		if err := g.Ctx.Bind(&params); err != nil {
 			g.ResponseCode(service.STATUS_CODE_SECRET_CHECK_FAILED, nil)
+			ctx.Abort()
+			return
+		}
+		if err := service.ValidateParameter(params); err != nil {
+			g.ResponseCode(service.STATUS_CODE_INVALID_PARAMS, nil)
 			ctx.Abort()
 			return
 		}
@@ -132,9 +136,13 @@ func (this *secretManagerImpl) InterceptAes() gin.HandlerFunc {
 		g := service.Gin{ctx}
 
 		var params SecretParams
-		err := g.Ctx.Bind(&params)
-		if err != nil {
+		if err := g.Ctx.Bind(&params); err != nil {
 			g.ResponseCode(service.STATUS_CODE_SECRET_CHECK_FAILED, nil)
+			ctx.Abort()
+			return
+		}
+		if err := service.ValidateParameter(params); err != nil {
+			g.ResponseCode(service.STATUS_CODE_INVALID_PARAMS, nil)
 			ctx.Abort()
 			return
 		}

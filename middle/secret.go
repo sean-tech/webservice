@@ -19,7 +19,7 @@ func init() {
 type ISecretManager interface {
 	SetAesKeyStorage(storage IAesKeyStorage)
 	startSubscribeToken()
-	GetAesKey(token string) string
+	GetAesKey(token string) (key string, ok bool)
 	InterceptRsa() gin.HandlerFunc
 	InterceptAes() gin.HandlerFunc
 }
@@ -69,13 +69,8 @@ func (this *secretManagerImpl) startSubscribeToken() {
 	}()
 }
 
-func (this *secretManagerImpl) GetAesKey(token string) string {
-	key, ok := this.aesKeyStorage.Load(token)
-	if !ok {
-		key = hex.EncodeToString(encrypt.GetAes().GenerateKey())
-		this.aesKeyStorage.Store(token, key, config.Global.JwtExpiresTime)
-	}
-	return key
+func (this *secretManagerImpl) GetAesKey(token string) (key string, ok bool) {
+	return this.aesKeyStorage.Load(token)
 }
 
 type SecretParams struct {

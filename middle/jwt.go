@@ -88,11 +88,11 @@ func (this *jwtManagerImpl) GenerateToken(userId uint64, userName, password stri
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
 	token, err := tokenClaims.SignedString([]byte(config.Global.JwtSecret))
 	if err == nil {
-		this.tokenStorage.Store(userId, token, config.Global.JwtExpiresTime)
 		originToken, ok := this.tokenStorage.Load(userId)
 		if ok == false {
 			originToken = ""
 		}
+		this.tokenStorage.Store(userId, token, config.Global.JwtExpiresTime)
 		this.publisher.Publish(map[string]interface{}{"originToken":originToken, "token":token, "expires":config.Global.JwtExpiresTime})
 	}
 	return token, err

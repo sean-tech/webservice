@@ -47,13 +47,11 @@ func GetJwtManager() IJwtManager {
  */
 type jwtManagerImpl struct{
 	tokenStorage IJwtTokenStorage
-	publisher *Publisher
 }
 
 func NewJwtManagerImpl() *jwtManagerImpl {
 	return &jwtManagerImpl{
 		tokenStorage: GetRedisTokenStorage(),
-		publisher:    NewPublisher("token", 10*time.Second),
 	}
 }
 
@@ -89,11 +87,11 @@ func (this *jwtManagerImpl) GenerateToken(userId uint64, userName, password stri
 	token, err := tokenClaims.SignedString([]byte(config.Global.JwtSecret))
 	if err == nil {
 		originToken, ok := this.tokenStorage.Load(userId)
-		if ok == false {
-			originToken = ""
+		if ok == true {
+			GetSecretManager().deleteAesKeyByOriginToken(originToken)
 		}
 		this.tokenStorage.Store(userId, token, config.Global.JwtExpiresTime)
-		this.publisher.Publish(map[string]interface{}{"originToken":originToken, "token":token, "expires":config.Global.JwtExpiresTime})
+		GetSecretManager().newAesKeyByChangedToken(token, config.Global.JwtExpiresTime)
 	}
 	return token, err
 }

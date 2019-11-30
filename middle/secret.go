@@ -12,14 +12,11 @@ import (
 	"time"
 )
 
-func init() {
-	GetSecretManager().startSubscribeToken()
-}
-
 type ISecretManager interface {
 	SetAesKeyStorage(storage IAesKeyStorage)
-	startSubscribeToken()
 	GetAesKey(token string) (key string, ok bool)
+	newAesKeyByChangedToken(newToken string, expiresTime time.Duration)
+	deleteAesKeyByOriginToken(originToken string)
 	InterceptRsa() gin.HandlerFunc
 	InterceptAes() gin.HandlerFunc
 }
@@ -51,26 +48,17 @@ func (this *secretManagerImpl) SetAesKeyStorage(storage IAesKeyStorage) {
 	}
 }
 
-func (this *secretManagerImpl) startSubscribeToken() {
-	sub := SubscribeTopic("token", 1)
-	go func() {
-		for message := range sub.Message {
-			if valMap, ok := message.(map[string]interface{}); ok {
-				originToken := valMap["originToken"].(string)
-				if len(originToken) > 1 {
-					this.aesKeyStorage.Delete(originToken)
-				}
-				token := valMap["token"].(string)
-				expiresTime := valMap["expires"].(time.Duration)
-				keyStr := hex.EncodeToString(encrypt.GetAes().GenerateKey())
-				this.aesKeyStorage.Store(token, keyStr, expiresTime)
-			}
-		}
-	}()
-}
-
 func (this *secretManagerImpl) GetAesKey(token string) (key string, ok bool) {
 	return this.aesKeyStorage.Load(token)
+}
+
+func (this *secretManagerImpl) newAesKeyByChangedToken(newToken string, expiresTime time.Duration) {
+	keyStr := hex.EncodeToString(encrypt.GetAes().GenerateKey())
+	this.aesKeyStorage.Store(newToken, keyStr, expiresTime)
+}
+
+func (this *secretManagerImpl) deleteAesKeyByOriginToken(originToken string) {
+	this.aesKeyStorage.Delete(originToken)
 }
 
 type SecretParams struct {

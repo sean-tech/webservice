@@ -39,23 +39,24 @@ type AppConfig struct{
 	Module 			string	`json:"module" validate:"required,gte=1"`
 	WorkerId 		int64	`json:"worker_id" validate:"min=0"`
 	RuntimeRootPath string	`json:"runtime_root_path" validate:"required,gt=1"`
+	LogSavePath string		`json:"log_save_path" validate:"required,gt=1"`
 }
 var App = &AppConfig{}
 
-type LogConfig struct{
-	LogSavePath string	`json:"log_save_path" validate:"required,gt=1"`
-	LogSaveName string	`json:"log_save_name" validate:"required,gte=1"`
-	LogFileExt 	string	`json:"log_file_ext" validate:"required,oneof=log txt"`
-}
-var Log = &LogConfig{}
-
-type UploadConfig struct{
-	FilePrefixUrl	string	`json:"file_prefix_url"`
-	FileSavePath 	string	`json:"file_save_path"`
-	FileMaxSize 	int		`json:"file_max_size"`
-	FileAllowExts 	[]string`json:"file_allow_exts"`
-}
-var Upload = &UploadConfig{}
+//type LogConfig struct{
+//	LogSavePath string	`json:"log_save_path" validate:"required,gt=1"`
+//	LogSaveName string	`json:"log_save_name" validate:"required,gte=1"`
+//	LogFileExt 	string	`json:"log_file_ext" validate:"required,oneof=log txt"`
+//}
+//var Log = &LogConfig{}
+//
+//type UploadConfig struct{
+//	FilePrefixUrl	string	`json:"file_prefix_url"`
+//	FileSavePath 	string	`json:"file_save_path"`
+//	FileMaxSize 	int		`json:"file_max_size"`
+//	FileAllowExts 	[]string`json:"file_allow_exts"`
+//}
+//var Upload = &UploadConfig{}
 
 type ServerConfig struct{
 	HttpPort              int			`json:"http_port" validate:"required,min=1,max=10000"`
@@ -127,18 +128,18 @@ func loadLocalConfig(configFilePath string) {
 		log.Fatalf("Cfg.MapTo App err: %v", err)
 	}
 
-	// Log convert
-	err = Cfg.Section("log").MapTo(Log)
-	if err != nil {
-		log.Fatalf("Cfg.MapTo Log err: %v", err)
-	}
-
-	// Upload convert
-	err = Cfg.Section("upload").MapTo(Upload)
-	if err != nil {
-		log.Fatalf("Cfg.MapTo Upload err: %v", err)
-	}
-	Upload.FileMaxSize = Upload.FileMaxSize * 1024 * 1024
+	//// Log convert
+	//err = Cfg.Section("log").MapTo(Log)
+	//if err != nil {
+	//	log.Fatalf("Cfg.MapTo Log err: %v", err)
+	//}
+	//
+	//// Upload convert
+	//err = Cfg.Section("upload").MapTo(Upload)
+	//if err != nil {
+	//	log.Fatalf("Cfg.MapTo Upload err: %v", err)
+	//}
+	//Upload.FileMaxSize = Upload.FileMaxSize * 1024 * 1024
 
 	// Server convert
 	err = Cfg.Section("server").MapTo(Server)

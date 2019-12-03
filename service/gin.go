@@ -34,7 +34,7 @@ func HttpServerServe(registerFunc GinRegisterFunc) {
 		logging.Debug(writer)
 	})
 	engine := gin.Default()
-	engine.StaticFS(config.Upload.FileSavePath, http.Dir(GetUploadFilePath()))
+	//engine.StaticFS(config.Upload.FileSavePath, http.Dir(GetUploadFilePath()))
 	registerFunc(engine)
 	// server
 	s := http.Server{
@@ -192,42 +192,42 @@ func (g *Gin) GetRequisition() *Requisition {
 /**
  * 文件上传处理函数
  */
-func (g *Gin) UploadFile() (fileUrl, filePath string, ok bool) {
-
-	data := make(map[string]string)
-
-	file, fileHeader, err := g.Ctx.Request.FormFile("file")
-	if err != nil {
-		logging.Warning(err)
-		g.ResponseMsg(STATUS_CODE_ERROR, err.Error(), data)
-		return "", "", false
-	}
-	if fileHeader == nil {
-		g.ResponseCode(STATUS_CODE_INVALID_PARAMS, data)
-		return "", "", false
-	}
-
-	fileName := GetUploadFileName(fileHeader.Filename)
-	fullPath := GetUploadFileFullPath()
-	savePath := GetUploadFilePath()
-	src := fullPath + fileName
-	if !CheckUploadFileExt(src) || !CheckUploadFileSize(file) {
-		g.ResponseCode(STATUS_CODE_UPLOAD_FILE_CHECK_FORMAT_WRONG, nil)
-		return "", "", false
-	}
-	if err := CheckUploadFile(fullPath); err != nil {
-		logging.Warning(err)
-		g.ResponseCode(STATUS_CODE_UPLOAD_FILE_CHECK_FAILED, nil)
-		return "", "", false
-	}
-	if err := g.Ctx.SaveUploadedFile(fileHeader, src); err != nil {
-		logging.Warning(err)
-		g.ResponseCode(STATUS_CODE_UPLOAD_FILE_SAVE_FAILED, nil)
-		return "", "", false
-	}
-	fileUrl = GetUploadFileFullUrl(fileName)
-	filePath = savePath + fileName
-	return fileUrl, filePath, true
-}
+//func (g *Gin) UploadFile() (fileUrl, filePath string, ok bool) {
+//
+//	data := make(map[string]string)
+//
+//	file, fileHeader, err := g.Ctx.Request.FormFile("file")
+//	if err != nil {
+//		logging.Warning(err)
+//		g.ResponseMsg(STATUS_CODE_ERROR, err.Error(), data)
+//		return "", "", false
+//	}
+//	if fileHeader == nil {
+//		g.ResponseCode(STATUS_CODE_INVALID_PARAMS, data)
+//		return "", "", false
+//	}
+//
+//	fileName := GetUploadFileName(fileHeader.Filename)
+//	fullPath := GetUploadFileFullPath()
+//	savePath := GetUploadFilePath()
+//	src := fullPath + fileName
+//	if !CheckUploadFileExt(src) || !CheckUploadFileSize(file) {
+//		g.ResponseCode(STATUS_CODE_UPLOAD_FILE_CHECK_FORMAT_WRONG, nil)
+//		return "", "", false
+//	}
+//	if err := CheckUploadFile(fullPath); err != nil {
+//		logging.Warning(err)
+//		g.ResponseCode(STATUS_CODE_UPLOAD_FILE_CHECK_FAILED, nil)
+//		return "", "", false
+//	}
+//	if err := g.Ctx.SaveUploadedFile(fileHeader, src); err != nil {
+//		logging.Warning(err)
+//		g.ResponseCode(STATUS_CODE_UPLOAD_FILE_SAVE_FAILED, nil)
+//		return "", "", false
+//	}
+//	fileUrl = GetUploadFileFullUrl(fileName)
+//	filePath = savePath + fileName
+//	return fileUrl, filePath, true
+//}
 
 

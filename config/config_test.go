@@ -47,17 +47,17 @@ func TestPutConfig(t *testing.T) {
 			WorkerId:        0,
 			RuntimeRootPath: "/Users/Lyra/Desktop/Go/",
 		},
-		Log:      LogConfig{
-			LogSavePath: "Log/webservice/",
-			LogSaveName: "user",
-			LogFileExt:  "Log",
-		},
-		Upload:   UploadConfig{
-			FilePrefixUrl: "http://127.0.0.1:8001",
-			FileSavePath:  "uploadfiles/",
-			FileMaxSize:   10,
-			FileAllowExts: []string{".jpg", ".jpeg", ".png"},
-		},
+		//Log:      LogConfig{
+		//	LogSavePath: "Log/webservice/",
+		//	LogSaveName: "user",
+		//	LogFileExt:  "Log",
+		//},
+		//Upload:   UploadConfig{
+		//	FilePrefixUrl: "http://127.0.0.1:8001",
+		//	FileSavePath:  "uploadfiles/",
+		//	FileMaxSize:   10,
+		//	FileAllowExts: []string{".jpg", ".jpeg", ".png"},
+		//},
 		Server:   ServerConfig{
 			HttpPort:             8811,
 			RpcPort:              8812,

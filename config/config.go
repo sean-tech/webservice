@@ -147,7 +147,7 @@ func loadLocalConfig(configFilePath string) {
 		log.Fatalf("Cfg.MapTo Server err: %v", err)
 	}
 	Server.ReadTimeout = Server.ReadTimeout * time.Second
-	Server.WriteTimeout = Server.ReadTimeout * time.Second
+	Server.WriteTimeout = Server.WriteTimeout * time.Second
 
 	// Database convert
 	err = Cfg.Section("database").MapTo(Database)

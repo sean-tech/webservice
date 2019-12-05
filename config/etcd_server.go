@@ -70,7 +70,7 @@ func GetConfigGlobal(path string, endpoints []string) (*GlobalConfig, error) {
 	}
 }
 
-func GetConfigApp(path string, endpoints []string, ip string) (*ModuleConfig, error) {
+func GetConfigModule(path string, endpoints []string, ip string) (*ModuleConfig, error) {
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   endpoints,
 		DialTimeout: _dialTimeout,

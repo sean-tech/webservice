@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"time"
 )
 
 type ModuleConfig struct {
@@ -28,8 +27,8 @@ func globalConfigWithJson(value []byte) (*GlobalConfig, error) {
 	if err := json.Unmarshal(value, global); err != nil {
 		return nil, err
 	}
-	global.JwtExpiresTime = Global.JwtExpiresTime * time.Hour
-	global.RedisIdleTimeout = Global.RedisIdleTimeout * time.Second
+	//global.JwtExpiresTime = Global.JwtExpiresTime * time.Hour
+	//global.RedisIdleTimeout = Global.RedisIdleTimeout * time.Second
 	return global, nil
 }
 
@@ -39,9 +38,9 @@ func appConfigWithJson(value []byte) (*ModuleConfig, error) {
 		return nil, err
 	}
 	//cfg.Upload.FileMaxSize = cfg.Upload.FileMaxSize * 1024 * 1024
-	cfg.Server.ReadTimeout = cfg.Server.ReadTimeout * time.Second
-	cfg.Server.WriteTimeout = cfg.Server.ReadTimeout * time.Second
-	cfg.Database.MaxLifetime = cfg.Database.MaxLifetime * time.Second
-	cfg.Redis.IdleTimeout = cfg.Redis.IdleTimeout * time.Second
+	//cfg.Server.ReadTimeout = cfg.Server.ReadTimeout * time.Second
+	//cfg.Server.WriteTimeout = cfg.Server.ReadTimeout * time.Second
+	//cfg.Database.MaxLifetime = cfg.Database.MaxLifetime * time.Second
+	//cfg.Redis.IdleTimeout = cfg.Redis.IdleTimeout * time.Second
 	return cfg, nil
 }

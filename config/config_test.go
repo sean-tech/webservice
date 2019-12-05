@@ -100,7 +100,7 @@ func TestLoad(t *testing.T) {
 		t.Error(err)
 	}
 	fmt.Println(g)
-	app, err := GetConfigApp(path, endpoints, "192.168.1.52")
+	app, err := GetConfigModule(path, endpoints, "192.168.1.52")
 	if err != nil {
 		t.Error(err)
 	}

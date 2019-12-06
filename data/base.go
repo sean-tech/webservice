@@ -11,7 +11,7 @@ type BaseModel struct {
 	CreateTime time.Time	`db:"create_time" json:"createTime"`
 	UpdateTime time.Time	`db:"update_time" json:"updateTime"`
 	UpdateUser string		`db:"update_user" json:"updateUser"`
-	TbStatus string			`db:"tb_status" json:"-"`
+	DeleteTime int64		`db:"delete_time" json:"-"`
 }
 
 type Error struct {

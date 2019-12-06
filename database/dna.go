@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-const dnaMaxBits int = 11
+const dnaMaxBits int = 32
 
 func Dna(userName string) (int, error) {
 	if len(userName) <= 0 {

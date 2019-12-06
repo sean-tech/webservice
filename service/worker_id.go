@@ -98,3 +98,7 @@ func GenerateId(workerId int64) (int64, error) {
 	id := workerInstance.GetId()
 	return id, nil
 }
+
+func ProjTimeStamp() int64 {
+	return time.Now().UnixNano() - epoch
+}

@@ -7,6 +7,10 @@ import (
 	"github.com/coreos/etcd/clientv3"
 )
 
+const (
+	PATH_GLOBAL = "/global"
+)
+
 func Put(path string, endpoints []string, value string) error {
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   endpoints,
@@ -54,7 +58,7 @@ func GetConfigGlobal(path string, endpoints []string) (*GlobalConfig, error) {
 	}
 	defer cli.Close()
 	// global get
-	global_path := path + "/global"
+	global_path := path + PATH_GLOBAL
 	if resp, err := cli.Get(context.Background(), global_path); err != nil {
 		return nil, err
 	} else {
@@ -70,7 +74,7 @@ func GetConfigGlobal(path string, endpoints []string) (*GlobalConfig, error) {
 	}
 }
 
-func GetConfigModule(path string, endpoints []string, ip string) (*ModuleConfig, error) {
+func GetConfigModule(path string, endpoints []string, moduleName string, ip string) (*ModuleConfig, error) {
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   endpoints,
 		DialTimeout: _dialTimeout,
@@ -80,7 +84,10 @@ func GetConfigModule(path string, endpoints []string, ip string) (*ModuleConfig,
 	}
 	defer cli.Close()
 	// app get
-	var cfg_path = path + "/" + ip
+	var cfg_path = path + "/" + moduleName
+	if ip != "" && len(ip) > 0 {
+		cfg_path = cfg_path + "/" + ip
+	}
 	if resp, err := cli.Get(context.Background(), cfg_path); err != nil {
 		return nil, err
 	} else {

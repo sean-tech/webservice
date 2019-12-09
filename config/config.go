@@ -177,7 +177,7 @@ func loadLocalConfig(configFilePath string) {
 /**
  * 初始化config，通过etcd注册中心
  */
-func Setup(defaultEtcdPath, defaultEndPointsStr string) {
+func Setup(defaultEtcdPath, defaultEndPointsStr, moduleName string, isAdmin bool) {
 	// cfp Etcd path
 	etcd_path_usage := "please use -etcdpath to pointing at Etcd path for config center to init webservice config."
 	etcd_path := flag.String("etcdpath", defaultEtcdPath, etcd_path_usage)
@@ -186,6 +186,10 @@ func Setup(defaultEtcdPath, defaultEndPointsStr string) {
 	etcd_endpoints_str_usage := "please use -endpoints to pointing at Etcd endpoints for config center to init webservice config. if more, use ',' to separate"
 	etcd_endpoints_str := flag.String("endpoints", defaultEndPointsStr, etcd_endpoints_str_usage)
 	*etcd_endpoints_str = strings.Replace(*etcd_endpoints_str, " ", "", -1)
+	// cfp module name
+	module_name_usage := "please use -module to pointing at module name for config center to init webservice config."
+	module_name := flag.String("endpoints", moduleName, module_name_usage)
+	*module_name = strings.Replace(*module_name, " ", "", -1)
 
 	flag.Parse()
 
@@ -195,7 +199,7 @@ func Setup(defaultEtcdPath, defaultEndPointsStr string) {
 	if etcd_endpoints_str == nil || len(*etcd_endpoints_str) <= 0 {
 		log.Fatal(etcd_endpoints_str_usage)
 	}
-	loadEtcdConfig(*etcd_path, strings.Split(*etcd_endpoints_str, ","))
+	loadEtcdConfig(*etcd_path, strings.Split(*etcd_endpoints_str, ","), moduleName, isAdmin)
 }
 
 /**

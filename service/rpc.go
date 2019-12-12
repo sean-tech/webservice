@@ -91,6 +91,9 @@ func CreateRpcClient(servicePath string) client.XClient {
 	option.HeartbeatInterval = time.Second
 	option.ReadTimeout = config.Server.ReadTimeout
 	option.WriteTimeout = config.Server.WriteTimeout
+	option.TLSConfig = &tls.Config{
+		InsecureSkipVerify: true,
+	}
 	xclient := client.NewXClient(servicePath, client.Failover, client.RoundRobin, *getDiscovery(servicePath), option)
 	return xclient
 }

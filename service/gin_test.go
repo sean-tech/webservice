@@ -21,7 +21,7 @@ func TestGinServer(t *testing.T) {
 		path = "sean.tech/webservice/config"
 		endpoints = "localhost:2379"
 	)
-	config.Setup(path, endpoints)
+	config.Setup(path, endpoints, "user", false)
 	logging.Setup()
 	// server start
 	HttpServerServe(ginApiRegister)

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"github.com/rcrowley/go-metrics"
 	"github.com/sean-tech/webservice/config"
@@ -21,8 +22,15 @@ type RpcRegisterFunc func(server *server.Server)
  * registerFunc 服务注册回调函数
  */
 func RpcServerServe(registerFunc RpcRegisterFunc) {
+	cert, err := tls.LoadX509KeyPair(config.App.RuntimeRootPath + config.App.TLSCerPath, config.App.RuntimeRootPath + config.App.TLSKeyPath)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	tlsConfig := &tls.Config{Certificates: []tls.Certificate{cert}}
+	s := server.NewServer(server.WithTLSConfig(tlsConfig))
+
 	address := fmt.Sprintf(":%d", config.Server.RpcPort)
-	s := server.NewServer()
 	RegisterPluginEtcd(s, address)
 	RegisterPluginRateLimit(s)
 	registerFunc(s)

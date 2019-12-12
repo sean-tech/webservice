@@ -40,6 +40,8 @@ type AppConfig struct{
 	WorkerId 		int64	`json:"worker_id" validate:"min=0"`
 	RuntimeRootPath string	`json:"runtime_root_path" validate:"required,gt=1"`
 	LogSavePath string		`json:"log_save_path" validate:"required,gt=1"`
+	TLSCerPath string		`json:"tls_cer_path" validate:"required,gt=1"`
+	TLSKeyPath string		`json:"tls_key_path" validate:"required,gt=1"`
 }
 var App = &AppConfig{}
 
@@ -188,7 +190,7 @@ func Setup(defaultEtcdPath, defaultEndPointsStr, moduleName string, isAdmin bool
 	*etcd_endpoints_str = strings.Replace(*etcd_endpoints_str, " ", "", -1)
 	// cfp module name
 	module_name_usage := "please use -module to pointing at module name for config center to init webservice config."
-	module_name := flag.String("endpoints", moduleName, module_name_usage)
+	module_name := flag.String("module", moduleName, module_name_usage)
 	*module_name = strings.Replace(*module_name, " ", "", -1)
 
 	flag.Parse()

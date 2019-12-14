@@ -165,7 +165,7 @@ func TestPutConfig(t *testing.T) {
 
 	var cfg = &config.ModuleConfig{
 		App:      config.AppConfig{
-			Module:          "user",
+			ServiceName:     "user",
 			WorkerId:        0,
 			RuntimeRootPath: "/Users/Lyra/Desktop/Go/",
 			LogSavePath: "log/webservice/",

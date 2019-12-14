@@ -22,7 +22,7 @@ func getLogFilePath() string {
 func getLastDayLogFileName(levelFlag string) string {
 	lastDayTime := time.Now().AddDate(0, 0, -1)
 	return fmt.Sprintf("%s_%s_%s.%s",
-		config.App.Module,
+		config.App.ServiceName,
 		strings.ToLower(levelFlag),
 		lastDayTime.Format(__time_format),
 		__logfile_ext,
@@ -31,7 +31,7 @@ func getLastDayLogFileName(levelFlag string) string {
 
 func getLogFileName(levelFlag string) string {
 	return fmt.Sprintf("%s_%s.%s",
-		config.App.Module,
+		config.App.ServiceName,
 		strings.ToLower(levelFlag),
 		__logfile_ext,
 	)

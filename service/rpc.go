@@ -72,20 +72,10 @@ func RegisterPluginRateLimit(s *server.Server)  {
 	s.Plugins.Add(plugin)
 }
 
-var discoveryMap sync.Map
-func getDiscovery(servicePath string) *client.ServiceDiscovery {
-	if discovery, ok := discoveryMap.Load(servicePath); ok {
-		return discovery.(*client.ServiceDiscovery)
-	}
-	discovery := client.NewEtcdDiscovery(config.Global.EtcdRpcBasePath, servicePath, config.Global.EtcdEndPoints, nil)
-	discoveryMap.Store(servicePath, &discovery)
-	return &discovery
-}
-
 /**
  * 创建rpc调用客户端，基于Etcd服务发现
  */
-func CreateRpcClient(servicePath string) client.XClient {
+func CreateRpcClient(serviceName string) client.XClient {
 	option := client.DefaultOption
 	option.Heartbeat = true
 	option.HeartbeatInterval = time.Second
@@ -94,10 +84,18 @@ func CreateRpcClient(servicePath string) client.XClient {
 	option.TLSConfig = &tls.Config{
 		InsecureSkipVerify: true,
 	}
-	xclient := client.NewXClient(servicePath, client.Failover, client.RoundRobin, *getDiscovery(servicePath), option)
+	xclient := client.NewXClient(serviceName, client.Failover, client.RoundRobin, *getDiscovery(serviceName), option)
 	return xclient
 }
-
+var discoveryMap sync.Map
+func getDiscovery(serviceName string) *client.ServiceDiscovery {
+	if discovery, ok := discoveryMap.Load(serviceName); ok {
+		return discovery.(*client.ServiceDiscovery)
+	}
+	discovery := client.NewEtcdDiscovery(config.Global.EtcdRpcBasePath, serviceName, config.Global.EtcdEndPoints, nil)
+	discoveryMap.Store(serviceName, &discovery)
+	return &discovery
+}
 
 
 /**

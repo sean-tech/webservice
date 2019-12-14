@@ -36,7 +36,7 @@ type GlobalConfig struct{
 var Global = &GlobalConfig{}
 
 type AppConfig struct{
-	Module 			string	`json:"module" validate:"required,gte=1"`
+	ServiceName 	string	`json:"service_name" validate:"required,gte=1"`
 	WorkerId 		int64	`json:"worker_id" validate:"min=0"`
 	RuntimeRootPath string	`json:"runtime_root_path" validate:"required,gt=1"`
 	LogSavePath string		`json:"log_save_path" validate:"required,gt=1"`
@@ -179,7 +179,7 @@ func loadLocalConfig(configFilePath string) {
 /**
  * 初始化config，通过etcd注册中心
  */
-func Setup(defaultEtcdPath, defaultEndPointsStr, moduleName string, isAdmin bool) {
+func Setup(defaultEtcdPath, defaultEndPointsStr, serviceName string, isAdmin bool) {
 	// cfp Etcd path
 	etcd_path_usage := "please use -etcdpath to pointing at Etcd path for config center to init webservice config."
 	etcd_path := flag.String("etcdpath", defaultEtcdPath, etcd_path_usage)
@@ -189,9 +189,9 @@ func Setup(defaultEtcdPath, defaultEndPointsStr, moduleName string, isAdmin bool
 	etcd_endpoints_str := flag.String("endpoints", defaultEndPointsStr, etcd_endpoints_str_usage)
 	*etcd_endpoints_str = strings.Replace(*etcd_endpoints_str, " ", "", -1)
 	// cfp module name
-	module_name_usage := "please use -module to pointing at module name for config center to init webservice config."
-	module_name := flag.String("module", moduleName, module_name_usage)
-	*module_name = strings.Replace(*module_name, " ", "", -1)
+	service_name_usage := "please use -servicename to pointing at service name for config center to init webservice config."
+	service_name := flag.String("servicename", serviceName, service_name_usage)
+	*service_name = strings.Replace(*service_name, " ", "", -1)
 
 	flag.Parse()
 
@@ -201,7 +201,7 @@ func Setup(defaultEtcdPath, defaultEndPointsStr, moduleName string, isAdmin bool
 	if etcd_endpoints_str == nil || len(*etcd_endpoints_str) <= 0 {
 		log.Fatal(etcd_endpoints_str_usage)
 	}
-	loadEtcdConfig(*etcd_path, strings.Split(*etcd_endpoints_str, ","), moduleName, isAdmin)
+	loadEtcdConfig(*etcd_path, strings.Split(*etcd_endpoints_str, ","), serviceName, isAdmin)
 }
 
 /**

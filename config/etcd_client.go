@@ -47,7 +47,6 @@ func loadGlobal(cli *clientv3.Client, path string) {
 	if resp, err := cli.Get(context.Background(), global_path); err != nil {
 		log.Fatal(err)
 	} else {
-		log.Println(resp.Kvs)
 		if len(resp.Kvs) != 1 {
 			log.Fatal("gloabl config get error:kvs count not only 1")
 		}
@@ -66,7 +65,6 @@ func watchGlobal(cli *clientv3.Client, path string) {
 	rch := cli.Watch(context.Background(), path, clientv3.WithPrefix())
 	for wresp := range rch {
 		for _, ev := range wresp.Events {
-			log.Printf("Watch: %s %q: %q \n", ev.Type, ev.Kv.Key, ev.Kv.Value)
 			if ev.Type == clientv3.EventTypePut {
 				if g, err := globalConfigWithJson(ev.Kv.Value); err == nil {
 					Global = g
@@ -84,7 +82,6 @@ func loadModuleWithIp(cli *clientv3.Client, path string, moduleName string) {
 		if resp, err := cli.Get(context.Background(), this_path); err != nil {
 			log.Fatal(err)
 		} else {
-			log.Println(resp.Kvs)
 			if len(resp.Kvs) != 1 {
 				continue
 			}
@@ -108,7 +105,6 @@ func loadModuleWithName(cli *clientv3.Client, path string, moduleName string) {
 	if resp, err := cli.Get(context.Background(), cfg_path); err != nil {
 		log.Fatal(err)
 	} else {
-		log.Println(resp.Kvs)
 		if len(resp.Kvs) != 1 {
 			log.Fatal("module config get error:kvs count not only 1")
 		}
@@ -126,7 +122,6 @@ func watchModuleCfg(cli *clientv3.Client, path string) {
 	rch := cli.Watch(context.Background(), path, clientv3.WithPrefix())
 	for wresp := range rch {
 		for _, ev := range wresp.Events {
-			log.Printf("Watch: %s %q: %q \n", ev.Type, ev.Kv.Key, ev.Kv.Value)
 			if ev.Type == clientv3.EventTypePut {
 				if cfg, err := appConfigWithJson(ev.Kv.Value); err == nil {
 					cfg.bestow()

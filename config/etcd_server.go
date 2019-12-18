@@ -3,7 +3,6 @@ package config
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/coreos/etcd/clientv3"
 )
 
@@ -43,7 +42,8 @@ func Delete(path string, endpoints []string) error {
 	if resp, err := cli.Delete(context.Background(), path); err != nil {
 		return err
 	} else {
-		fmt.Println(resp)
+		//fmt.Println(resp)
+		_ = resp
 	}
 	return nil
 }

@@ -43,7 +43,7 @@ func TestPutConfig(t *testing.T) {
 
 	var cfg = &ModuleConfig{
 		App:      AppConfig{
-			Module:          "user",
+			ServiceName:          "user",
 			WorkerId:        0,
 			RuntimeRootPath: "/Users/Lyra/Desktop/Go/",
 		},
@@ -100,7 +100,7 @@ func TestLoad(t *testing.T) {
 		t.Error(err)
 	}
 	fmt.Println(g)
-	app, err := GetConfigModule(path, endpoints, "192.168.1.52")
+	app, err := GetConfigModule(path, endpoints, "user", "192.168.1.52")
 	if err != nil {
 		t.Error(err)
 	}

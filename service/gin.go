@@ -31,7 +31,6 @@ func HttpServerServe(registerFunc GinRegisterFunc) {
 	gin.DisableConsoleColor()
 	logging.GinWriterGet(func(writer io.Writer) {
 		gin.DefaultWriter = io.MultiWriter(writer, os.Stdout)
-		logging.Debug(writer)
 	})
 	engine := gin.Default()
 	//engine.StaticFS(config.Upload.FileSavePath, http.Dir(GetUploadFilePath()))

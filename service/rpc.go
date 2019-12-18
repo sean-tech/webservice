@@ -27,7 +27,9 @@ func RpcServerServe(registerFunc RpcRegisterFunc) {
 		log.Fatal(err)
 		return
 	}
-	tlsConfig := &tls.Config{Certificates: []tls.Certificate{cert}}
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+	}
 	s := server.NewServer(server.WithTLSConfig(tlsConfig))
 
 	address := fmt.Sprintf(":%d", config.Server.RpcPort)
@@ -82,7 +84,7 @@ func CreateRpcClient(serviceName string) client.XClient {
 	option.ReadTimeout = config.Server.ReadTimeout
 	option.WriteTimeout = config.Server.WriteTimeout
 	option.TLSConfig = &tls.Config{
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: false,
 	}
 	xclient := client.NewXClient(serviceName, client.Failover, client.RoundRobin, *getDiscovery(serviceName), option)
 	return xclient

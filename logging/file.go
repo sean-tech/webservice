@@ -9,25 +9,31 @@ import (
 	"time"
 )
 
+const (
+	__time_format = "20060101"
+	__logfile_ext = "log"
+)
+
+
 func getLogFilePath() string {
-	return fmt.Sprintf("%s%s", config.AppSetting.RuntimeRootPath, config.LogSetting.LogSavePath)
+	return fmt.Sprintf("%s%s", config.App.RuntimeRootPath, config.App.LogSavePath)
 }
 
 func getLastDayLogFileName(levelFlag string) string {
 	lastDayTime := time.Now().AddDate(0, 0, -1)
 	return fmt.Sprintf("%s_%s_%s.%s",
-		config.LogSetting.LogSaveName,
+		config.App.ServiceName,
 		strings.ToLower(levelFlag),
-		lastDayTime.Format(config.LogSetting.TimeFormat),
-		config.LogSetting.LogFileExt,
+		lastDayTime.Format(__time_format),
+		__logfile_ext,
 	)
 }
 
 func getLogFileName(levelFlag string) string {
 	return fmt.Sprintf("%s_%s.%s",
-		config.LogSetting.LogSaveName,
+		config.App.ServiceName,
 		strings.ToLower(levelFlag),
-		config.LogSetting.LogFileExt,
+		__logfile_ext,
 	)
 }
 
